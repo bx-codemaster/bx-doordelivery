@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "scopes": {
+        "shop-root": {
+            "hashes": {
+                "/images/icons/bx-codchange.png": "2943edcddfe160c245d7aead2eb46185",
+                "/images/icons/bx-doordelivery.png": "3abcf28371ddadfb36de750f6f8b05d9",
+                "/includes/modules/checkout/doordelivery_payment_unallowed.php": "202d184187942c3bf29f35b3ce2be948",
+                "/includes/modules/payment/codchange.php": "6b1edb1ba137baa82e023bc7087e9281",
+                "/includes/modules/shipping/doordelivery.php": "02359986ad2accb5adf1d6a44051ec74",
+                "/lang/english/modules/payment/codchange.php": "fee770f23f668fa98c017ec727d4bc28",
+                "/lang/english/modules/shipping/doordelivery.php": "5823df34fe9242524075608e2c6f0748",
+                "/lang/german/modules/payment/codchange.php": "45f3f7d5e1a40cf6495a7d69b7c00b81",
+                "/lang/german/modules/shipping/doordelivery.php": "252888572ae79c7666d47b95336e70c1",
+                "/lang/spanish/modules/payment/codchange.php": "a4800b5705fef085055a53e736a0d8c0",
+                "/lang/spanish/modules/shipping/doordelivery.php": "96ed4ff49664e604cdc0131f7debbc9b"
+            }
+        },
+        "shop-vendor-mmlc": {
+            "hashes": []
+        }
+    }
+}

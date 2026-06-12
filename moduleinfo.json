@@ -1,0 +1,31 @@
+{
+    "name": "BX Door Delivery",
+    "archiveName": "bx-codemaster/bx-doordelivery",
+    "category": "productivity",
+    "developer": "Axel Benkert",
+    "developerWebsite": "https://www.bx-coding.de",
+    "website": "https://www.der-eisenhans.de",
+    "srcDir": "src",
+    "version": "auto",
+    "shortDescription": "Liefer- und Zahlungsmodule für Lieferdienste",
+    "description": "BX Door Delivery bietet Versand- und Zahlungsmodule für Lieferdienste, die es ermöglichen, Lieferungen direkt an die Haustür der Kunden zu liefern. Es unterstützt verschiedene Lieferdienste und Zahlungsarten, um eine flexible und bequeme Lösung für die Lieferung von Waren zu bieten.",
+    "price": "174.80", 
+    "date": "2026-06-12 00:00:00",
+    "php": {
+      "version": "^7.4 || ^8.0"
+    },
+    "modifiedCompatibility": [
+      "3.0.1",
+      "3.0.2",
+      "3.1.0",
+      "3.1.1",
+      "3.1.2",
+      "3.1.3",
+      "3.1.4",
+      "3.1.5",
+      "3.1.6",
+      "3.2.0",
+      "3.2.1",
+      "3.3.0"
+    ]
+}
