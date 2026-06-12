@@ -111,10 +111,11 @@ class codchange {
   }
 
   public function pre_confirmation_check(): bool {
+    global $messageStack;
     if (isset($_POST['cod_change_bill'])) {
-      // Bereinigen (Sonderzeichen entfernen)
-      $bill = trim(strip_tags($_POST['cod_change_bill']));
-      if (!empty($bill)) {
+      // Bereinigen (Sonderzeichen entfernen) und Validieren der Benutzereingabe
+      $bill = filter_var($_POST['cod_change_bill'], FILTER_VALIDATE_FLOAT);
+      if ( !empty($bill) && $bill > floatval($_SESSION['cart']->show_total()) ) {
         $_SESSION['cod_change_bill'] = $bill;
       } else {
         unset($_SESSION['cod_change_bill']);
@@ -156,9 +157,9 @@ class codchange {
     global $insert_order;
 
     if (isset($_SESSION['cod_change_bill']) && !empty($_SESSION['cod_change_bill'])) {
-      $bill_value = trim(strip_tags($_SESSION['cod_change_bill']));
+      $bill_value = filter_var($_SESSION['cod_change_bill'], FILTER_VALIDATE_FLOAT);
       
-      $insert_order['orders_change_bill'] = $bill_value;
+      $insert_order['cod_change_bill'] = $bill_value;
       
       // Session aufräumen
       unset($_SESSION['cod_change_bill']);
@@ -216,9 +217,9 @@ class codchange {
 
   public function install(): void {
     // Spalte für das Wechselgeld in der Bestell-Tabelle hinzufügen, falls sie noch nicht existiert
-    $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE 'orders_change_bill'");
+    $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE 'cod_change_bill'");
     if (xtc_db_num_rows($check_column) == 0) {
-      xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD orders_change_bill VARCHAR(32) DEFAULT NULL");
+      xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD cod_change_bill VARCHAR(32) DEFAULT NULL");
     }
 
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) 
@@ -244,7 +245,10 @@ class codchange {
   }
 
   public function remove(): void {
-    // Info: Um Datensicherungen bei Upgrades/Modul-Wechseln nicht zu gefährden, entfernen wir die Spalte orders_change_bill hier nicht automatisch.
+    $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE 'cod_change_bill'");
+    if (xtc_db_num_rows($check_column) > 0) {
+      xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " DROP `cod_change_bill`");
+    }
     xtc_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE configuration_key in ('".implode("', '", $this->keys())."')");
   }
 

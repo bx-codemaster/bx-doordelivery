@@ -64,11 +64,15 @@ class doordelivery {
         return false;
     }
 
-    public function check(): int {
-        $check = xtc_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_SHIPPING_DOORDELIVERY_STATUS'");
-        $check = xtc_db_num_rows($check);
+    public function check(): bool {
+        $check_query = xtc_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_SHIPPING_DOORDELIVERY_STATUS'");
+        $check = xtc_db_num_rows($check_query);
 
-        return $check;
+        if($check !== false) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function install(): void {

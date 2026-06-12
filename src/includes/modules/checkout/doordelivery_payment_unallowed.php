@@ -7,45 +7,35 @@
 
 class doordelivery_payment_unallowed {
 	public string $code; 
-	public string $title;
-	public string $name;	
+	public string $title;	
 	public string $description;	
 	public string $sort_order;
 	public bool $enabled;
-	public bool|int $_check;
+	public bool $_check;
 	
 	public function __construct() {
         $this->code        = 'doordelivery_payment_unallowed';
-        $this->name        = 'MODULE_CHECKOUT_'.strtoupper($this->code);
-		$this->title       = defined($this->name.'_TITLE') ? constant($this->name.'_TITLE') : '';        
-        $this->description = defined($this->name.'_DESCRIPTION') ? constant($this->name.'_DESCRIPTION') : '';        
-        $this->enabled     = defined($this->name.'_STATUS') && constant($this->name.'_STATUS') == 'true' ? true : false;
-        $this->sort_order  = defined($this->name.'_SORT_ORDER') ? constant($this->name.'_SORT_ORDER') : ''; 
+		$this->title       = MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS_TITLE;
+        $this->description = MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS_DESC;
+        $this->enabled     = defined('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS') && constant('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS') == 'true' ? true : false;
+        $this->sort_order  = defined('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_SORT_ORDER') ? constant('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_SORT_ORDER') : ''; 
     }
 
-    public function check(): bool|int {
+    public function check(): bool {
       if (!isset($this->_check)) {
-        if (defined($this->name.'_STATUS')) {
+        if (defined('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS')) {
           $this->_check = true;
         } else {
-          $check_query = xtc_db_query("SELECT configuration_value 
-                                         FROM " . TABLE_CONFIGURATION . " 
-                                        WHERE configuration_key = '".$this->name."_STATUS'");
-          $this->_check = xtc_db_num_rows($check_query);
+          $this->_check = false;
         }
       }
       return $this->_check;
     }
 
     public function keys(): array {
-        define($this->name.'_STATUS_TITLE', TEXT_DEFAULT_STATUS_TITLE);
-        define($this->name.'_STATUS_DESC', TEXT_DEFAULT_STATUS_DESC);
-        define($this->name.'_SORT_ORDER_TITLE', TEXT_DEFAULT_SORT_ORDER_TITLE);
-        define($this->name.'_SORT_ORDER_DESC', TEXT_DEFAULT_SORT_ORDER_DESC);
-
         return array(
-            $this->name.'_STATUS',
-            $this->name.'_SORT_ORDER'
+            'MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS',
+            'MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_SORT_ORDER'
         );
     }
 
@@ -56,7 +46,7 @@ class doordelivery_payment_unallowed {
                                                                      sort_order, 
                                                                      set_function, 
                                                                      date_added) 
-                                                             VALUES ('".$this->name."_STATUS', 
+                                                             VALUES ('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_STATUS', 
                                                                      'true', 
                                                                      '6', 
                                                                      '1', 
@@ -67,7 +57,7 @@ class doordelivery_payment_unallowed {
                                                                      configuration_group_id, 
                                                                      sort_order, 
                                                                      date_added) 
-                                                             VALUES ('".$this->name."_SORT_ORDER', 
+                                                             VALUES ('MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_SORT_ORDER', 
                                                                      '99', 
                                                                      '6', 
                                                                      '2', 
@@ -75,7 +65,7 @@ class doordelivery_payment_unallowed {
     }
 
     public function remove(): void {
-        xtc_db_query("DELETE FROM " . TABLE_CONFIGURATION . " WHERE configuration_key LIKE '".$this->name."_%'");
+        xtc_db_query("DELETE FROM " . TABLE_CONFIGURATION . " WHERE configuration_key LIKE 'MODULE_CHECKOUT_DOORDELIVERY_PAYMENT_UNALLOWED_%'");
     }
 
     public function unallowed_payment_modules(array $unallowed_modules): array {
@@ -93,9 +83,10 @@ class doordelivery_payment_unallowed {
             }, $array1);
 
             // 3. Vergleichen: Welche Werte aus Array 1 fehlen in Array 2?
-            $fehlende_werte = array_diff($array1_clean, $array2);
-            
-            return $unallowed_modules = array_merge($unallowed_modules,$fehlende_werte);
+            $fehlende_werte    = array_diff($array1_clean, $array2);
+            $unallowed_modules = array_merge($unallowed_modules,$fehlende_werte);
+
+            return $unallowed_modules;
         }
         return $unallowed_modules;
     }
