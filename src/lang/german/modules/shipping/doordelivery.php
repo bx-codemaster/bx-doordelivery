@@ -37,3 +37,12 @@ define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_DESC', 'Reihenfolge der Anzeige'
 
 define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_TITLE', 'Erlaubte Zahlungsarten');
 define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_DESC', 'Geben Sie <b>einzeln</b> die Zahlungsarten an, welche für diesen Versand erlaubt sein sollen  (z.B. cod,banktransfer,cc (lassen Sie dieses Feld leer, wenn Sie alle Zahlungsarten erlauben wollen))');
+
+define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_TITLE', 'Steuerklasse');
+define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_DESC', 'Wählen Sie die Steuerklasse für diesen Versand aus.');
+
+define('MODULE_SHIPPING_DOORDELIVERY_COST_TITLE', 'Zustellkosten');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Zustellung-Pauschale (z.B. 4.50).');
+
+define('MODULE_SHIPPING_DOORDELIVERY_COST_NET', 'Zustellkosten (netto)');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Zustellkosten (brutto)');

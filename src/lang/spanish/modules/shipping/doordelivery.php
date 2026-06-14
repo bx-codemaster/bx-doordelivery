@@ -37,3 +37,9 @@ define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_DESC', 'Orden de visualización'
 
 define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_TITLE', 'Métodos de pago permitidos');
 define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_DESC', 'Especifique <b>individualmente</b> los métodos de pago que están permitidos para este envío (por ejemplo, cod,banktransfer,cc (si se deja en blanco, se permitirán todos los métodos de pago))');
+
+define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_TITLE', 'Clase de impuesto');
+define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_DESC', 'Seleccione la clase de impuesto para este envío.');
+
+define('MODULE_SHIPPING_DOORDELIVERY_COST_TITLE', 'Costos de entrega');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Tarifa plana de entrega (por ejemplo, 4.50). Por favor, ingrese un monto neto.');

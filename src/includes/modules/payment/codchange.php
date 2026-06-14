@@ -21,7 +21,7 @@ class codchange {
   private float $limit_subtotal;
 
   public function __construct() {
-    global $order, $xtPrice;
+    global $order;
 
     $this->code        = 'codchange';
     $this->title       = defined('MODULE_PAYMENT_CODCHANGE_TEXT_TITLE') ? MODULE_PAYMENT_CODCHANGE_TEXT_TITLE : 'Barzahlung mit Wechselgeld';
@@ -48,7 +48,13 @@ class codchange {
 
   public function update_status(): void {
     global $order;
-    
+
+    // Prüfen, ob $order existiert, ein Objekt ist und die nötigen Daten enthält
+    if (!is_object($order) || !isset($order->billing['country']['id'])) {
+        $this->enabled = false;
+        return; // Funktion sofort abbrechen, da die Basisdaten fehlen
+    }
+
     // Deaktivierung bei Selbstabholung
     if (isset($_SESSION['shipping']) 
         && is_array($_SESSION['shipping'])
@@ -91,7 +97,12 @@ class codchange {
     global $xtPrice;
 
     // Sicherer Check auf Warenkorb-Objekt zur Vermeidung von Fatal Errors im Checkout
-    if ($this->limit_subtotal && isset($_SESSION['cart']) && is_object($_SESSION['cart']) && ($xtPrice->xtcRemoveCurr($_SESSION['cart']->show_total()) >= $this->limit_subtotal)) {
+    if (
+      $this->limit_subtotal && 
+      isset($_SESSION['cart']) && 
+      is_object($_SESSION['cart']) 
+      && ($xtPrice->xtcRemoveCurr($_SESSION['cart']->show_total()) >= $this->limit_subtotal)
+    ) {
       return false; // WICHTIG: false statt null, damit modified das Modul sauber ausblendet
     }
     
@@ -99,7 +110,7 @@ class codchange {
     $fields_array = array(
       array(
         'title' => MODULE_PAYMENT_CODCHANGE_QUESTION_TEXT,
-        'field' => xtc_draw_input_field('cod_change_bill', $_SESSION['cod_change_bill'] ?? '', 'placeholder="z.B. 50" style="width:100px;"').' '.MODULE_PAYMENT_CODCHANGE_COURIER_CHANGE_TEXT,
+        'field' => xtc_draw_input_field('cod_change_bill', $_SESSION['cod_change_bill'] ?? '', 'placeholder="z.B. 50" style="width:100px;" onkeydown="if(event.key === \',\'){event.preventDefault(); this.value += \'.\';}"').' '.MODULE_PAYMENT_CODCHANGE_COURIER_CHANGE_TEXT,
       )
     );
 
@@ -111,14 +122,13 @@ class codchange {
   }
 
   public function pre_confirmation_check(): bool {
-    global $messageStack;
     if (isset($_POST['cod_change_bill'])) {
       // Bereinigen (Sonderzeichen entfernen) und Validieren der Benutzereingabe
       $bill = filter_var($_POST['cod_change_bill'], FILTER_VALIDATE_FLOAT);
-      if ( !empty($bill) && $bill > floatval($_SESSION['cart']->show_total()) ) {
+      if ( !empty($bill) && $bill > 0.00 ) {
         $_SESSION['cod_change_bill'] = $bill;
       } else {
-        unset($_SESSION['cod_change_bill']);
+        $_SESSION['cod_change_bill'] = null;
       }
     }
     return false;
@@ -141,35 +151,53 @@ class codchange {
   }
 
   public function process_button(): string {
-    global $xtPrice;
-    $note = '';
-    if (defined('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO') && MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO == 'True') {
-      $note = sprintf(MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT, 
-                      $xtPrice->xtcFormatCurrency($_SESSION['cod_change_bill'] ?? 0), 
-                      $xtPrice->xtcFormatCurrency($_SESSION['cart']->show_total()), 
-                      $xtPrice->xtcFormatCurrency(($_SESSION['cod_change_bill'] ?? 0) - $_SESSION['cart']->show_total())
-                     );
-    }
-    return $note;
+      global $xtPrice;
+
+      // 1. Early Return: Vorab-Prüfungen minimieren Schachtelung
+      if (!defined('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO') || MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO !== 'True') {
+        return '';
+      }
+
+      if (!isset($_SESSION['cod_change_bill']) || !xtc_not_null($_SESSION['cod_change_bill'])) {
+        return '';
+      }
+
+      // 2. Werte sauber in lokale Variablen schreiben und casten
+      $billAmount = (float)$_SESSION['cod_change_bill'];
+      $cartTotal  = (float)$_SESSION['cart']->show_total();
+
+      // 3. Logik ausführen
+      if ($billAmount >= $cartTotal) {
+          $difference = $billAmount - $cartTotal;
+          
+          return sprintf(
+              MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT, 
+              $xtPrice->xtcFormatCurrency($billAmount), 
+              $xtPrice->xtcFormatCurrency($cartTotal), 
+              $xtPrice->xtcFormatCurrency($difference)
+          );
+      }
+
+      if ($billAmount < $cartTotal) {
+        $difference = $cartTotal - $billAmount;
+                  
+          return sprintf(
+              MODULE_PAYMENT_CODCHANGE_ERROR_TEXT, 
+              $xtPrice->xtcFormatCurrency($billAmount), 
+              $xtPrice->xtcFormatCurrency($cartTotal), 
+              $xtPrice->xtcFormatCurrency($difference)
+          );
+      }
+      
+      return '';
   }
 
   public function before_process(): bool {
-    global $insert_order;
-
-    if (isset($_SESSION['cod_change_bill']) && !empty($_SESSION['cod_change_bill'])) {
-      $bill_value = filter_var($_SESSION['cod_change_bill'], FILTER_VALIDATE_FLOAT);
-      
-      $insert_order['cod_change_bill'] = $bill_value;
-      
-      // Session aufräumen
-      unset($_SESSION['cod_change_bill']);
-    }
-    
     return false;
   }
 
   public function after_process(): void {
-    global $insert_id;
+    global $xtPrice, $insert_id;
 
     if (isset($this->order_status) && $this->order_status) {
       $orders_query = xtc_db_query("SELECT orders_status 
@@ -182,14 +210,39 @@ class codchange {
                          SET orders_status = '".$this->order_status."' 
                        WHERE orders_id = '".(int)$insert_id."'");
 
+        $history_date = new DateTime();
+        $mysqlReady   = $history_date->format('Y-m-d H:i:s');
+        
         $sql_data_array = array(
           'orders_id'        => (int)$insert_id,
           'orders_status_id' => $this->order_status,
-          'date_added'       => 'now()',
+          'date_added'       => $mysqlReady,
         );
         xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
       }
     }
+
+    $change_query = xtc_db_query("SELECT cod_change_bill FROM orders WHERE orders_id = '".(int)$insert_id."';");
+    $change = xtc_db_fetch_array($change_query, true);
+    $cash   = $xtPrice->xtcFormatCurrency((float)$change["cod_change_bill"]);
+    $total  = $xtPrice->xtcFormatCurrency((float)$_SESSION['cart']->show_total());
+    $change_amount = $xtPrice->xtcFormatCurrency((float)$change["cod_change_bill"] - (float)$_SESSION['cart']->show_total());
+    
+    // Barzahlung mit Wechselgeld
+    define('MODULE_PAYMENT_CODCHANGE_MEMO_TITLE', 'Barzahlung mit Wechselgeld');
+    $memo_title = MODULE_PAYMENT_CODCHANGE_MEMO_TITLE;
+
+    define('MODULE_PAYMENT_CODCHANGE_MEMO_TEXT', 'Der Kunde hat angegeben, dass er mit einem Betrag von %s bezahlen möchte. Der Gesamtbetrag der Bestellung beträgt %s. Das Wechselgeld beträgt somit %s.');
+    $memo_text  = sprintf(MODULE_PAYMENT_CODCHANGE_MEMO_TEXT, $cash, $total, $change_amount);
+
+    $sql_data_array = array(
+      'customers_id' => (int)$_SESSION['customer_id'],
+      'memo_date'    => date("Y-m-d"),
+      'memo_title'   => $memo_title,
+      'memo_text'    => nl2br($memo_text),
+      'poster_id'    => (int)$_SESSION['customer_id']
+    );
+    xtc_db_perform(TABLE_CUSTOMERS_MEMO, $sql_data_array);
   }
 
   public function get_error(): bool {
@@ -222,26 +275,94 @@ class codchange {
       xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD cod_change_bill VARCHAR(32) DEFAULT NULL");
     }
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_STATUS', 'True', '6', '1', 'xtc_cfg_select_option(array(\'True\', \'False\'), ', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             set_function, 
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_STATUS', 
+                                                             'True', 
+                                                             '6', 
+                                                             '1', 
+                                                             'xtc_cfg_select_option(array(\'True\', \'False\'), ', 
+                                                             now())");
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_ALLOWED', '', '6', '2', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_ALLOWED', 
+                                                             '', 
+                                                             '6', 
+                                                             '2', 
+                                                             now())");
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, use_function, set_function, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_ZONE', '0', '6', '3', 'xtc_get_zone_class_title', 'xtc_cfg_pull_down_zone_classes(', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             use_function, 
+                                                             set_function,
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_ZONE', 
+                                                             '0', 
+                                                             '6', 
+                                                             '3', 
+                                                             'xtc_get_zone_class_title', 
+                                                             'xtc_cfg_pull_down_zone_classes(', 
+                                                             now())");
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_SORT_ORDER', '0', '6', '4', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_SORT_ORDER', 
+                                                             '0', 
+                                                             '6', 
+                                                             '4', 
+                                                             now())");
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, use_function, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_ORDER_STATUS_ID', '0', '6', '5', 'xtc_cfg_pull_down_order_statuses(', 'xtc_get_order_status_name', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             set_function, 
+                                                             use_function, 
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_ORDER_STATUS_ID', 
+                                                             '0', 
+                                                             '6', 
+                                                             '5', 
+                                                             'xtc_cfg_pull_down_order_statuses(', 
+                                                             'xtc_get_order_status_name', 
+                                                             now())");
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED', '600', '6', '6', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED', 
+                                                             '600', 
+                                                             '6', 
+                                                             '6', 
+                                                             now())");
 
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) 
-                       VALUES ('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO', 'True', '6', '7', 'xtc_cfg_select_option(array(\'True\', \'False\'), ', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
+                                                             configuration_value, 
+                                                             configuration_group_id, 
+                                                             sort_order, 
+                                                             set_function, 
+                                                             date_added) 
+                                                     VALUES ('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO', 
+                                                             'True', 
+                                                             '6', 
+                                                             '7', 
+                                                             'xtc_cfg_select_option(array(\'True\', \'False\'), ', 
+                                                             now())");
   }
 
   public function remove(): void {

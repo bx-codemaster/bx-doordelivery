@@ -35,10 +35,15 @@ define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TITLE', 'Anzeige im Checkout');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_DESC', 'Soll ein Hinweis auf zusätzlich anfallende Kosten im Checkout angezeigt werden?');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TEXT', '<div class="infomessage">Der Rechnungsbetrag ist bei Sendungsübergabe an den Zusteller zu entrichten.</div>');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_BILL_TEXT', 'Geplantes Wechselgeld:');
-define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div class="successmessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
     <div>Sie zahlen mit </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Der Rechnungsbetrag beträgt </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Ihr Wechselgeld beträgt dann </div><div style="text-align: right; font-weight: bold;">%s</div>
 </div>');
 define('MODULE_PAYMENT_CODCHANGE_QUESTION_TEXT', 'Mit welchem Barbetrag möchten Sie bezahlen?');
 define('MODULE_PAYMENT_CODCHANGE_COURIER_CHANGE_TEXT', ' Der Bote bekommt das passende Wechselgeld mit.');
+define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+    <div>Sie zahlen mit </div><div style="text-align: right; font-weight: bold;">%s</div>
+    <div>Der Rechnungsbetrag beträgt </div><div style="text-align: right; font-weight: bold;">%s</div>
+    <div>Es fehlen noch </div><div style="text-align: right; font-weight: bold;">%s</div>
+</div>');

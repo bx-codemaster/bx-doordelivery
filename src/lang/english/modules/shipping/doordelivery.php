@@ -37,3 +37,6 @@ define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_DESC', 'Order of display');
 
 define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_TITLE', 'Allowed Payment Methods');
 define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_DESC', 'Specify <b>individually</b> the payment methods that are allowed for this shipping method. (e.g., cod,banktransfer,cc (leave this field empty to allow all payment methods))');
+
+define('MODULE_SHIPPING_DOORDELIVERY_COST_TITLE', 'Delivery Costs');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Delivery flat rate (e.g., 4.50). Please enter a net amount.');

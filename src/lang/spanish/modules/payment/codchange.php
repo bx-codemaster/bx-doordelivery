@@ -35,10 +35,15 @@ define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TITLE', 'Mostrar información en e
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_DESC', '¿Desea mostrar un aviso sobre los costos adicionales en el checkout?');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TEXT', '<div class="infomessage">El importe de la factura debe pagarse al recibir el pedido.</div>');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_BILL_TEXT', 'Cambio previsto:');
-define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div class="successmessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
     <div>Usted paga con </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>El importe de la factura es </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Su cambio será </div><div style="text-align: right; font-weight: bold;">%s</div>
 </div>');
 define('MODULE_PAYMENT_CODCHANGE_QUESTION_TEXT', '¿Con qué cantidad desea pagar?');
 define('MODULE_PAYMENT_CODCHANGE_COURIER_CHANGE_TEXT', ' El mensajero recibirá el cambio correspondiente.');
+define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+    <div>Usted paga con </div><div style="text-align: right; font-weight: bold;">%s</div>
+    <div>El importe de la factura es </div><div style="text-align: right; font-weight: bold;">%s</div>
+    <div>Aún falta </div><div style="text-align: right; font-weight: bold;">%s</div>
+</div>');

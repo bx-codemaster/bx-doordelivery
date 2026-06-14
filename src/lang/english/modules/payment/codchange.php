@@ -35,10 +35,16 @@ define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TITLE', 'Display in Checkout');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_DESC', 'Should a notice about additional costs be displayed in the checkout?');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TEXT', '<div class="infomessage">The invoice amount is to be paid upon delivery to the courier.</div>');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_BILL_TEXT', 'Planned Change:');
-define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div class="successmessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
     <div>You pay with </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>The invoice amount is </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Your change will be </div><div style="text-align: right; font-weight: bold;">%s</div>
 </div>');
 define('MODULE_PAYMENT_CODCHANGE_QUESTION_TEXT', 'What amount would you like to pay with?');
 define('MODULE_PAYMENT_CODCHANGE_COURIER_CHANGE_TEXT', ' The courier will receive the appropriate change.');
+define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+    <div>You pay by </div><div style="text-align: right; font-weight: bold;">%s</div>
+    <div>The invoice amount is </div><div style="text-align: right; font-weight: bold;">%s</div>
+    <div>Still missing </div><div style="text-align: right; font-weight: bold;">%s</div>
+</div>');
+
