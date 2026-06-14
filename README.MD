@@ -1,6 +1,6 @@
 ## Modul-Zusammenfassung: Haustürlieferung & Wechselgeld-Komfort
 
-Dieses dreiteilige Modulpaket erweitert *modified eCommerce* um eine spezialisierte Versandart für die lokale Zustellung (**Haustürlieferung**) sowie um ein intelligentes Zahlungsmanagement. Es optimiert den Checkout-Prozess für Händler, die Ware direkt zum Kunden bringen und dabei Barzahlung oder passgenaue Zahlungsweisen anbieten möchten.
+Dieses dreiteilige Modulpaket erweitert *modified eCommerce* um eine spezialisierte Versandart für die lokale Zustellung (**Haustürlieferung**) sowie um ein intelligentes Zahlungsmanagement. Es optimiert den Checkout-Prozess für Händler, die Ware direkt zum Kunden bringen und dabei Barzahlung oder passgenaue Zahlungsweisen anbieten möchten. [Video ansehen](https://youtu.be/GpuyzdJOCKg)
 
 ---
 
