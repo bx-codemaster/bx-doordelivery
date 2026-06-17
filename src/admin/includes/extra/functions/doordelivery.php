@@ -20,7 +20,7 @@ if (!function_exists('xtc_cfg_doordelivery_areas')) {
     $areasArrayQuery  = xtc_db_query("SELECT `configuration_value` FROM `configuration` WHERE `configuration_key` = 'MODULE_SHIPPING_DOORDELIVERY_AREAS' LIMIT 1");
     $areasArrayResult = xtc_db_fetch_array($areasArrayQuery);
     $areasJson         = $areasArrayResult['configuration_value']; // Der gespeicherte JSON-String
-    $areasArray       = json_decode($areasArrayResult['configuration_value'], true);
+    $areasArray       = json_decode($areasArrayResult['configuration_value'], false) ?? []; // In ein Array umwandeln, falls JSON korrekt ist, sonst leeres Array
     
     
     $doordelivery_areas = '<input type="hidden" name="configuration[MODULE_SHIPPING_DOORDELIVERY_AREAS]" value=\''.$areasJson.'\' id="jsonHiddenInput">'
