@@ -44,4 +44,4 @@ define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Delivery flat rate (e.g., 4.50
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Delivery Areas');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Specify the postal codes or postal code ranges that are within your delivery area.<br>For example, 12345, 23456 or 45*, 501* for all postal codes starting with 45 or 501. Remove an entry by clicking on it.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', 'Not in the delivery area');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . 'Not in the delivery area');

@@ -47,4 +47,4 @@ define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Tarifa plana de entrega (por e
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Áreas de entrega');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Especifique los códigos postales o rangos de códigos postales que están dentro de su área de entrega.<br>Por ejemplo, 12345, 23456 o 45*, 501* para todos los códigos postales que comienzan con 45 o 501. Elimine una entrada haciendo clic en ella.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', 'No está en el área de entrega');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . 'No está en el área de entrega');
