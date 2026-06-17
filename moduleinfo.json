@@ -9,7 +9,7 @@
     "version": "auto",
     "shortDescription": "Liefer- und Zahlungsmodule für Lieferdienste",
     "description": "BX Door Delivery bietet Versand- und Zahlungsmodule für Lieferdienste, die es ermöglichen, Lieferungen direkt an die Haustür der Kunden zu liefern. Es unterstützt verschiedene Lieferdienste und Zahlungsarten, um eine flexible und bequeme Lösung für die Lieferung von Waren zu bieten.",
-    "price": "174.80", 
+    "price": "178.50", 
     "date": "2026-06-12 00:00:00",
     "php": {
       "version": "^7.4 || ^8.0"

@@ -46,3 +46,8 @@ define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Zustellung-Pauschale (z.B. 4.5
 
 define('MODULE_SHIPPING_DOORDELIVERY_COST_NET', 'Zustellkosten (netto)');
 define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Zustellkosten (brutto)');
+
+define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Liefergebiete');
+define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Geben Sie die Postleitzahlen oder Postleitzahlenbereiche an, welche in Ihrem Liefergebiet liegen.<br>Z.B. 12345, 23456 oder 45*, 501* für alle PLZ die mit 45 oder 501 beginnen. Sie entfernen einen Eintrag, indem Sie ihn anklicken.');
+
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', 'Nicht im Liefergebiet liegende Postleitzahl');
