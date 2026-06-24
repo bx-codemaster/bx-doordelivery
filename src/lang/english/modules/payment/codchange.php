@@ -48,3 +48,4 @@ define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="
     <div>Still missing </div><div style="text-align: right; font-weight: bold;">%s</div>
 </div>');
 
+define('MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT', 'A change amount of %s or more is not allowed for security reasons. Please enter a smaller amount.');

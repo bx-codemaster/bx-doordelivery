@@ -21,30 +21,38 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-define('MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE', 'Entrega a domicilio');
-define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', 'Le entregamos la mercancía directamente en su puerta.');
+define('MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE', 'Entrega a Domicilio');
+define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', 'Entregamos los productos directamente en su puerta.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_WAY', MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION);
 
-define('MODULE_SHIPPING_DOORDELIVERY_ALLOWED_TITLE' , 'Zonas permitidas');
-define('MODULE_SHIPPING_DOORDELIVERY_ALLOWED_DESC' , 'Especifique <b>individualmente</b> las zonas que están permitidas para este módulo. (por ejemplo, AT,DE (si se deja en blanco, se permitirán todas las zonas))');
+define('MODULE_SHIPPING_DOORDELIVERY_ALLOWED_TITLE' , 'Zonas Permitidas');
+define('MODULE_SHIPPING_DOORDELIVERY_ALLOWED_DESC' , 'Especifique <b>individualmente</b> las zonas a las que es posible el envío. (por ejemplo, AT,DE (deje este campo vacío si desea permitir todas las zonas))');
 
-define('MODULE_SHIPPING_DOORDELIVERY_STATUS_TITLE', 'Activar entrega a domicilio');
+define('MODULE_SHIPPING_DOORDELIVERY_STATUS_TITLE', 'Habilitar Entrega a Domicilio');
 define('MODULE_SHIPPING_DOORDELIVERY_STATUS_DESC', '¿Desea ofrecer entrega a domicilio?');
 
-define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_TITLE', 'Orden de visualización');
+define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_TITLE', 'Orden de Clasificación');
 define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_DESC', 'Orden de visualización');
 
-define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_TITLE', 'Métodos de pago permitidos');
-define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_DESC', 'Especifique <b>individualmente</b> los métodos de pago que están permitidos para este envío (por ejemplo, cod,banktransfer,cc (si se deja en blanco, se permitirán todos los métodos de pago))');
+define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_TITLE', 'Métodos de Pago Permitidos');
+define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_DESC', 'Especifique <b>individualmente</b> los métodos de pago permitidos para este envío (por ejemplo, cod,banktransfer,cc (deje este campo vacío si desea permitir todos los métodos de pago))');
 
-define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_TITLE', 'Clase de impuesto');
+define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_TITLE', 'Clase de Impuesto');
 define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_DESC', 'Seleccione la clase de impuesto para este envío.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_COST_TITLE', 'Costos de entrega');
-define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Tarifa plana de entrega (por ejemplo, 4.50). Por favor, ingrese un monto neto.');
+define('MODULE_SHIPPING_DOORDELIVERY_ZIP_CODE_TITLE', 'Código Postal');
+define('MODULE_SHIPPING_DOORDELIVERY_ZIP_CODE_DESC', 'Ingrese un código postal o un rango.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Áreas de entrega');
-define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Especifique los códigos postales o rangos de códigos postales que están dentro de su área de entrega.<br>Por ejemplo, 12345, 23456 o 45*, 501* para todos los códigos postales que comienzan con 45 o 501. Elimine una entrada haciendo clic en ella.');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_NET', 'Costo de Envío (Neto)');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_NET_DESC', 'Ingrese el costo de envío (neto)...');
 
-define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . 'No está en el área de entrega');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Costo de Envío (Bruto)');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS_DESC', 'Ingrese el costo de envío (bruto)...');
+
+define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Áreas de Envío');
+define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Ingrese los códigos postales o rangos de códigos postales que están dentro de su área de envío.<br>Por ejemplo, 12345, 23456 o 45*, 501* para todos los códigos postales que comienzan con 45 o 501. Elimine una entrada haciendo clic en ella.');
+
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . '<br>Código postal no está en el área de envío');
+
+define ('MODULE_SHIPPING_DOORDELIVERY_TXT_ADD', 'Agregar');

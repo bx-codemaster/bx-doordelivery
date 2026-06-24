@@ -17,222 +17,187 @@
     }
 ?>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    /* BOF Calculate NET / GROSS */
-    // 1. Elemente anhand der Selektoren auswählen
-    const nettotext = document.getElementById('calculate_netto');
-    const bruttotext = document.getElementById('calculate_brutto');
-    
-    // Fester Faktor basierend auf dem Steuersatz
-    const FAKTOR = 1 + (<?php echo $delivery_tax_rate; ?> / 100);
+(function() {
+    function initDoorDelivery() {
+        /* BOF Calculate NET / GROSS */
+        const nettotext  = document.getElementById('feeInputNetto');
+        const bruttotext = document.getElementById('feeInputBrutto');
+        
+        // Fester Faktor basierend auf dem Steuersatz
+        const FAKTOR = 1 + (<?php echo (float)$delivery_tax_rate; ?> / 100);
+        
+        if (nettotext && bruttotext) {
+            // Initialen Wert berechnen, falls Netto vorhanden ist
+            if (nettotext.value && !isNaN(parseFloat(nettotext.value.replace(',', '.')))) {
+                const initialNetto = parseFloat(nettotext.value.replace(',', '.'));
+                bruttotext.value = (initialNetto * FAKTOR).toFixed(4);
+            }
 
-    // Hilfsfunktion: Berechnet den initialen Wert beim Laden der Seite
-    if (nettotext && nettotext.value) {
-        const initialNetto = parseFloat(nettotext.value.replace(',', '.'));
-        if (!isNaN(initialNetto)) {
-            bruttotext.value = (initialNetto * FAKTOR).toFixed(4);
+            // Event für Netto-Eingabe (Berechnet Brutto)
+            nettotext.addEventListener('input', function () {
+                let wert = parseFloat(this.value.replace(',', '.'));
+                if (!isNaN(wert)) {
+                    bruttotext.value = (wert * FAKTOR).toFixed(4);
+                } else {
+                    bruttotext.value = '';
+                }
+            });
+
+            // Event für Brutto-Eingabe (Berechnet Netto)
+            bruttotext.addEventListener('input', function () {
+                let wert = parseFloat(this.value.replace(',', '.'));
+                if (!isNaN(wert)) {
+                    nettotext.value = (wert / FAKTOR).toFixed(4);
+                } else {
+                    nettotext.value = '';
+                }
+            });
         }
-    
-        // 2. Event für die Eingabe im ersten Feld (Multiplikation)
-        nettotext.addEventListener('input', function () {
-            // Komma durch Punkt ersetzen, um Rechenfehler zu vermeiden
-            let wert = parseFloat(this.value.replace(',', '.'));
-            
-            if (!isNaN(wert)) {
-                bruttotext.value = (wert * FAKTOR).toFixed(4);
-            } else {
-                bruttotext.value = ''; // Feld leeren, wenn die Eingabe ungültig ist
-            }
-        });
+        /* EOF Calculate NET / GROSS */
 
-    }
-    if (bruttotext && bruttotext.value) {
-        // 3. Event für die Eingabe im zweiten Feld (Division)
-        bruttotext.addEventListener('input', function () {
-            let wert = parseFloat(this.value.replace(',', '.'));
-            
-            if (!isNaN(wert)) {
-                nettotext.value = (wert / FAKTOR).toFixed(4);
-            } else {
-                nettotext.value = ''; // Feld leeren, wenn die Eingabe ungültig ist
-            }
-        });
-    }
-    /* EOF Calculate NET / GROSS */
+        /* BOF AD ZIPS */
+        const areaInput   = document.getElementById('areaInput');
+        const feeInput    = document.getElementById('feeInputNetto'); 
+        const addButton   = document.getElementById('addArea');
+        const areaList    = document.getElementById('areaList');
+        const hiddenInput = document.getElementById('jsonHiddenInput');
 
-    /* BOF AD ZIPS */
-    const areaInput   = document.getElementById('areaInput');
-    const addButton   = document.getElementById('addArea');
-    const areaList    = document.getElementById('areaList');
-    const hiddenInput = document.getElementById('jsonHiddenInput');
+        if (!hiddenInput) return; // Falls das Modul nicht aktiv gerendert ist, hier abbrechen
 
-    let zipsArray = [];
-    
-    if (hiddenInput && hiddenInput.value) {
-        try {
-            // Parsen der Daten (wir wandeln z.B. '["12345","50*"]' wieder in ein echtes JS-Array um)
-            zipsArray = JSON.parse(hiddenInput.value);
-        } catch (e) {
-            console.error("Fehler beim Parsen der initialen PLZ-Daten:", e);
-            zipsArray = [];
-        }
-    }
-
-    function addPostalCode() {
-        const text = areaInput.value.trim();
-
-        if (text !== "") {
-            // 1. PLZ-Format prüfen (optional, je nach Anforderung)
-            const result = validateEuropeanPostalCode(text, '<?php echo $customersCountryCode; ?>');
-            if (!result) {
-                alert("Ungültiges PLZ-Format! Bitte eine gültige PLZ aus " + '<?php echo $customersCountryName; ?>' + " eingeben.");
-                return;
-            }
-
-            // 2. Visuell: Element an die HTML-Liste (ul) anhängen
+        let zipsArray = [];
+        
+        function renderListItem(zip, fee) {
+            if (!areaList) return;
             const newZip = document.createElement('li');
-            newZip.textContent = text;
+            newZip.innerHTML = `<strong>${zip}</strong> - Gebühr: ${parseFloat(fee).toFixed(2)} € <span style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">[X]</span>`;
+            newZip.setAttribute('data-zip', zip); 
+            newZip.setAttribute('data-fee', fee); 
             areaList.appendChild(newZip);
-
-            // 3. Daten-Ebene (NEU): Begriff in unser JavaScript-Array pushen
-            zipsArray.push(text);
-
-            // 4. JSON-Konvertierung (NEU): Array in JSON-String umwandeln
-            const jsonString = JSON.stringify(zipsArray);
-
-            // 5. Zuweisung (NEU): Den JSON-String in das Hidden-Input schreiben
-            hiddenInput.value = jsonString;
-
-            // 6. Eingabefeld leeren
-            areaInput.value = "";
-            areaInput.focus();
-        }
-    }
-
-    function validateEuropeanPostalCode(postalCode, countryCode) {
-        // Eingaben säubern (Trimmen und Ländercode in Großbuchstaben)
-        countryCode = countryCode.trim().toUpperCase();
-        postalCode  = postalCode.trim();
-
-        // Regex-Katalog aller europäischen Länder
-        const patterns = {
-            // Europäische Union (EU)
-            'AT': /^\d{4}$/,                           // Österreich
-            'BE': /^\d{4}$/,                           // Belgien
-            'BG': /^\d{4}$/,                           // Bulgarien
-            'CY': /^\d{4}$/,                           // Zypern
-            'CZ': /^\d{3}\s?\d{2}$/,                   // Tschechien (z.B. 123 45)
-            'DE': /^\d{5}$/,                           // Deutschland
-            'DK': /^\d{4}$/,                           // Dänemark
-            'EE': /^\d{5}$/,                           // Estland
-            'ES': /^\d{5}$/,                           // Spanien
-            'FI': /^\d{5}$/,                           // Finnland
-            'FR': /^\d{5}$/,                           // Frankreich
-            'GR': /^\d{3}\s?\d{2}$/,                   // Griechenland
-            'HR': /^\d{5}$/,                           // Kroatien
-            'HU': /^\d{4}$/,                           // Ungarn
-            'IE': /^[A-Z]\d{2}\s?[A-Z\d]{4}$/i,        // Irland (Eircode, z.B. D02 X285)
-            'IT': /^\d{5}$/,                           // Italien
-            'LT': /^\d{5}$/,                           // Litauen
-            'LU': /^\d{4}$/,                           // Luxemburg
-            'LV': /^\d{4}$/,                           // Lettland
-            'MT': /^[A-Z]{3}\s?\d{4}$/i,               // Malta (z.B. VLT 1115)
-            'NL': /^\d{4}\s?[A-Z]{2}$/i,               // Niederlande
-            'PL': /^\d{2}-\d{3}$/,                     // Polen (z.B. 00-001)
-            'PT': /^\d{4}-\d{3}$/,                     // Portugal (z.B. 1234-567)
-            'RO': /^\d{6}$/,                           // Rumänien
-            'SE': /^\d{3}\s?\d{2}$/,                   // Schweden
-            'SI': /^\d{4}$/,                           // Slowenien
-            'SK': /^\d{3}\s?\d{2}$/,                   // Slowakei
-
-            // EFTA & Nicht-EU Westeuropa
-            'CH': /^\d{4}$/,                           // Schweiz
-            'IS': /^\d{3}$/,                           // Island
-            'LI': /^\d{4}$/,                           // Liechtenstein
-            'NO': /^\d{4}$/,                           // Norwegen
-            'GB': /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i, // Großbritannien
-
-            // Europäische Zwergstaaten
-            'AD': /^AD\d{3}$/i,                        // Andorra (z.B. AD500)
-            'MC': /^980\d{2}$/,                        // Monaco (z.B. 98000)
-            'SM': /^4789\d$/,                          // San Marino (z.B. 47890)
-            'VA': /^00120$/,                           // Vatikanstadt (exakt 00120)
-
-            // Osteuropa & Balkan (Kandidaten & Weitere)
-            'AL': /^\d{4}$/,                           // Albanien
-            'BA': /^\d{5}$/,                           // Bosnien und Herzegowina
-            'BY': /^\d{6}$/,                           // Belarus
-            'MD': /^\d{4}$/,                           // Moldawien
-            'ME': /^85\d{3}$/,                         // Montenegro
-            'MK': /^\d{4}$/,                           // Nordmazedonien
-            'RS': /^\d{5}$/,                           // Serbien
-            'RU': /^\d{6}$/,                           // Russland
-            'TR': /^\d{5}$/,                           // Türkei
-            'UA': /^\d{5}$/,                           // Ukraine
-        };
-
-        // Prüfen, ob das Land im Katalog existiert
-        if (!patterns.hasOwnProperty(countryCode)) {
-            return false;
         }
 
-        // --- WILDCARD LOGIK ---
-        if (postalCode.includes('*')) {
-            if (postalCode === '*') return false; 
-            
-            const prefix = postalCode.split('*')[0]; 
-            let regexString = patterns[countryCode].source;
-            
-            // 1. Anker am Ende ($) entfernen
-            if (regexString.endsWith('$')) {
-                regexString = regexString.slice(0, -1);
+        // JSON einlesen und Liste initial aufbauen
+        if (hiddenInput.value) {
+            try {
+                zipsArray = JSON.parse(hiddenInput.value);
+                if (Array.isArray(zipsArray)) {
+                    areaList.innerHTML = ''; // Liste leeren gegen Doppel-Rendering
+                    zipsArray.forEach(item => {
+                        if (typeof item === 'object' && item !== null) {
+                            renderListItem(item.zip, item.fee);
+                        } else {
+                            renderListItem(item, "0.00");
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Fehler beim Parsen der initialen PLZ-Daten:", e);
+                zipsArray = [];
             }
-            
-            // 2. Fixe Quantifier wie {5} zu {1,5} umwandeln, damit auch kürzere Eingaben matchen
-            regexString = regexString.replace(/\{(\d+)\}/g, '{1,$1}');
-            
-            // 3. Optionale Strukturen am Ende für den Teilmatch erlauben
-            // Erstellt eine dynamische Regex mit den originalen Flags (z.B. 'i')
-            const wildcardRegex = new RegExp(regexString, patterns[countryCode].flags);
-            
-            return wildcardRegex.test(prefix);
         }
-        // --- ENDE WILDCARD LOGIK ---
 
-        // Validierung durchführen (Gibt true oder false zurück)
-        return patterns[countryCode].test(postalCode);
-    }
+        function addPostalCode() {
+            if (!areaInput || !feeInput) return;
 
-    addButton.addEventListener('click', addPostalCode);
-    areaInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Verhindert das Absenden des Formulars
-            addPostalCode();
-        }
-    });
-    // Event-Listener für das Löschen per Klick
-    areaList.addEventListener('click', (event) => {
-        // Prüfen, ob wirklich auf ein LI-Element geklickt wurde
-        if (event.target.tagName === 'LI') {
-            const geklickterText = event.target.textContent;
+            const text = areaInput.value.trim();
+            let fee  = feeInput.value.trim().replace(',', '.'); 
 
-            // 1. Aus dem JavaScript-Array entfernen
-            // Wir suchen den Index des Textes und schneiden ihn aus dem Array
-            const index = zipsArray.indexOf(geklickterText);
-            if (index !== -1) {
-                zipsArray.splice(index, 1);
+            if (fee === "") {
+                fee = "0.00";
             }
 
-            // 2. Das HTML-Element aus der Liste löschen
-            event.target.remove();
+            if (text !== "") {
+                const result = validateEuropeanPostalCode(text, '<?php echo $customersCountryCode; ?>');
+                
+                if (!result) {
+                    alert("Ungültiges PLZ-Format! Bitte eine gültige PLZ aus " + '<?php echo $customersCountryName; ?>' + " eingeben.");
+                    return;
+                }
+                
+                if (isNaN(parseFloat(fee)) || parseFloat(fee) < 0) {
+                    alert("Bitte eine gültige Gebühr eingeben (z.B. 4.50 oder 0 für kostenlos).");
+                    return;
+                }
 
-            // 3. Das Hidden-Input aktualisieren
-            const jsonString = JSON.stringify(zipsArray);
-            hiddenInput.value = jsonString;
+                const exists = zipsArray.some(item => typeof item === 'object' && item !== null ? item.zip === text : item === text);
+                if (exists) {
+                    alert("Diese PLZ oder dieser Bereich existiert bereits in der Liste.");
+                    return;
+                }
+
+                fee = parseFloat(fee).toFixed(2);
+                renderListItem(text, fee);
+
+                zipsArray.push({ zip: text, fee: fee });
+                hiddenInput.value = JSON.stringify(zipsArray);
+
+                areaInput.value = "";
+                feeInput.value = "";
+                if(bruttotext) bruttotext.value = "";
+                areaInput.focus();
+            }
         }
-    });
-    /* EOF AD ZIPS */
-});
+
+        function validateEuropeanPostalCode(postalCode, countryCode) {
+            countryCode = countryCode.trim().toUpperCase();
+            postalCode  = postalCode.trim();
+
+            const patterns = {
+                'AT': /^\d{4}$/,'BE': /^\d{4}$/,'BG': /^\d{4}$/,'CY': /^\d{4}$/,'CZ': /^\d{3}\s?\d{2}$/,'DE': /^\d{5}$/,'DK': /^\d{4}$/,'EE': /^\d{5}$/,'ES': /^\d{5}$/,'FI': /^\d{5}$/,'FR': /^\d{5}$/,'GR': /^\d{3}\s?\d{2}$/,'HR': /^\d{5}$/,'HU': /^\d{4}$/,'IE': /^[A-Z]\d{2}\s?[A-Z\d]{4}$/i,'IT': /^\d{5}$/,'LT': /^\d{5}$/,'LU': /^\d{4}$/,'LV': /^\d{4}$/,'MT': /^[A-Z]{3}\s?\d{4}$/i,'NL': /^\d{4}\s?[A-Z]{2}$/i,'PL': /^\d{2}-\d{3}$/,'PT': /^\d{4}-\d{3}$/,'RO': /^\d{6}$/,'SE': /^\d{3}\s?\d{2}$/,'SI': /^\d{4}$/,'SK': /^\d{3}\s?\d{2}$/,'CH': /^\d{4}$/,'IS': /^\d{3}$/,'LI': /^\d{4}$/,'NO': /^\d{4}$/,'GB': /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i,'AD': /^AD\d{3}$/i,'MC': /^980\d{2}$/,'SM': /^4789\d$/,'VA': /^00120$/,'AL': /^\d{4}$/,'BA': /^\d{5}$/,'BY': /^\d{6}$/,'MD': /^\d{4}$/,'ME': /^85\d{3}$/,'MK': /^\d{4}$/,'RS': /^\d{5}$/,'RU': /^\d{6}$/,'TR': /^\d{5}$/,'UA': /^\d{5}$/
+            };
+
+            if (!patterns.hasOwnProperty(countryCode)) return false;
+
+            if (postalCode.includes('*')) {
+                if (postalCode === '*') return false; 
+                const prefix = postalCode.split('*')[0]; 
+                let regexString = patterns[countryCode].source;
+                if (regexString.endsWith('$')) {
+                    regexString = regexString.slice(0, -1);
+                }
+                regexString = regexString.replace(/\{(\d+)\}/g, '{1,$1}');
+                const wildcardRegex = new RegExp(regexString, patterns[countryCode].flags);
+                return wildcardRegex.test(prefix);
+            }
+
+            return patterns[countryCode].test(postalCode);
+        }
+
+        if (addButton && areaInput) {
+            addButton.addEventListener('click', addPostalCode);
+            
+            [areaInput, feeInput, bruttotext].forEach(input => {
+                if (input) { 
+                    input.addEventListener('keypress', (event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            addPostalCode();
+                        }
+                    });
+                }
+            });
+        }
+
+        if (areaList) {
+            areaList.addEventListener('click', (event) => {
+                const liElement = event.target.closest('li');
+                if (liElement) {
+                    const zipToDelete = liElement.getAttribute('data-zip');
+                    zipsArray = zipsArray.filter(item => typeof item === 'object' && item !== null ? item.zip !== zipToDelete : item !== zipToDelete);
+                    liElement.remove();
+                    hiddenInput.value = JSON.stringify(zipsArray);
+                }
+            });
+        }
+        /* EOF AD ZIPS WITH FEES */
+    }
+
+    // Sicherstellen, dass das Skript läuft, egal wann es geladen wird
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initDoorDelivery);
+    } else {
+        initDoorDelivery();
+    }
+})();
 </script>
 <?php
   }

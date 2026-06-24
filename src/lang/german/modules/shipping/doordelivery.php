@@ -21,7 +21,7 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-define('MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE', 'Lieferung nach Hause');
+define('MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE', 'Haustürlieferung');
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', 'Wir liefern Ihnen die Ware direkt an Ihre Haustüre.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_WAY', MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION);
@@ -29,8 +29,8 @@ define('MODULE_SHIPPING_DOORDELIVERY_TEXT_WAY', MODULE_SHIPPING_DOORDELIVERY_TEX
 define('MODULE_SHIPPING_DOORDELIVERY_ALLOWED_TITLE' , 'Erlaubte Zonen');
 define('MODULE_SHIPPING_DOORDELIVERY_ALLOWED_DESC' , 'Geben Sie <b>einzeln</b> die Zonen an, in welche ein Versand möglich sein soll. (z.B. AT,DE (lassen Sie dieses Feld leer, wenn Sie alle Zonen erlauben wollen))');
 
-define('MODULE_SHIPPING_DOORDELIVERY_STATUS_TITLE', 'Lieferung nach Hause aktivieren');
-define('MODULE_SHIPPING_DOORDELIVERY_STATUS_DESC', 'Möchten Sie Lieferung nach Hause anbieten?');
+define('MODULE_SHIPPING_DOORDELIVERY_STATUS_TITLE', 'Haustürlieferung aktivieren');
+define('MODULE_SHIPPING_DOORDELIVERY_STATUS_DESC', 'Möchten Sie Haustürlieferung anbieten?');
 
 define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_TITLE', 'Sortierreihenfolge');
 define('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER_DESC', 'Reihenfolge der Anzeige');
@@ -41,13 +41,18 @@ define('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED_DESC', 'Geben Sie <b>einze
 define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_TITLE', 'Steuerklasse');
 define('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS_DESC', 'Wählen Sie die Steuerklasse für diesen Versand aus.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_COST_TITLE', 'Zustellkosten');
-define('MODULE_SHIPPING_DOORDELIVERY_COST_DESC', 'Zustellung-Pauschale (z.B. 4.50).');
+define('MODULE_SHIPPING_DOORDELIVERY_ZIP_CODE_TITLE', 'Postleitzahl');
+define('MODULE_SHIPPING_DOORDELIVERY_ZIP_CODE_DESC', 'Geben Sie eine Postleitzahl oder einen Bereich ein.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_COST_NET', 'Zustellkosten (netto)');
-define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Zustellkosten (brutto)');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_NET', 'Liefergebühr (netto)');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_NET_DESC', 'Liefergebühr (netto) eingeben...');
+
+define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Liefergebühr (brutto)');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS_DESC', 'Liefergebühr (brutto) eingeben...');
 
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Liefergebiete');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Geben Sie die Postleitzahlen oder Postleitzahlenbereiche an, welche in Ihrem Liefergebiet liegen.<br>Z.B. 12345, 23456 oder 45*, 501* für alle PLZ die mit 45 oder 501 beginnen. Sie entfernen einen Eintrag, indem Sie ihn anklicken.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . 'Nicht im Liefergebiet liegende Postleitzahl');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . '<br>Nicht im Liefergebiet liegende Postleitzahl');
+
+define ('MODULE_SHIPPING_DOORDELIVERY_TXT_ADD', 'Hinzufügen');

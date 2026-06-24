@@ -1,23 +1,12 @@
-<?PHP
+<?php
 /* -----------------------------------------------------------------------------------------
-   $Id: doordelivery.php 2026-06-11 12:00:00Z benax $
+   $Id: doordelivery.php 2026-06-23 12:00:00Z benax $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on: 
-   (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(freeamount.php,v 1.01 2002/01/24); www.oscommerce.com 
-   (c) 2003	 nextcommerce (freeamount.php,v 1.12 2003/08/24); www.nextcommerce.org
-   (c) 2006 xt:Commerce; www.xt-commerce.com
-
-   Released under the GNU General Public License 
-   -----------------------------------------------------------------------------------------
-   Third Party contributions:
-   selfpickup         	Autor:	sebthom
-
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
@@ -55,13 +44,20 @@ class doordelivery {
             $this->error = 'True';
         }
 
-        // 2. Deine erlaubten Liefergebiete für die Haustüre definieren
-        $deliveryArea = defined('MODULE_SHIPPING_DOORDELIVERY_AREAS') ? json_decode(MODULE_SHIPPING_DOORDELIVERY_AREAS) : array();
-    
-        // 3. PLZ-Prüfung durchführen
-        if (!$this->checkPostcodeMatch($customerZip, $deliveryArea)) {
-            // Nicht im Liefergebiet? Modul wird im Checkout nicht angezeigt.
+        // 2. Erlaubte Liefergebiete (Array aus Objekten/Arrays mit 'zip' und 'fee')
+        // json_decode(..., true) stellt sicher, dass wir ein assoziatives PHP-Array erhalten
+        $deliveryArea = defined('MODULE_SHIPPING_DOORDELIVERY_AREAS') ? json_decode(MODULE_SHIPPING_DOORDELIVERY_AREAS, true) : array();
+        if (!is_array($deliveryArea)) {
+            $deliveryArea = array();
+        }
+
+        // 3. PLZ-Prüfung durchführen & passende Gebühr ermitteln
+        $matchedFee = $this->getPostcodeFee($customerZip, $deliveryArea);
+
+        if ($matchedFee === false) {
+            // Nicht im Liefergebiet? Fehler triggern -> Modul zeigt Fehlermeldung oder blendet aus
             $this->error = 'True';
+            $matchedFee = 0.00; 
         }
 
         $this->quotes = array(
@@ -69,22 +65,22 @@ class doordelivery {
             'module' => MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE,
         );
 
-        if('True' === $this->error) {
+        if ('True' === $this->error) {
             $this->quotes['error'] = MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA;
         }
 
+        // 4. Dynamische Kosten an die Checkout-Ausgabe übergeben
         $this->quotes['methods'] = array(array(
             'id'    => $this->code,
             'title' => MODULE_SHIPPING_DOORDELIVERY_TEXT_WAY,
-            'cost'  => (float)MODULE_SHIPPING_DOORDELIVERY_COST,
+            'cost'  => (float)$matchedFee, 
         ));
 
         if ($this->tax_class > 0) {
             $this->quotes['tax'] = xtc_get_tax_rate($this->tax_class, $order->delivery['shipping']['id'], $order->delivery['shipping']['zone_id']);
         }
 
-
-        if(xtc_not_null($this->icon)) {
+        if (xtc_not_null($this->icon)) {
             $this->quotes['icon'] = xtc_image($this->icon, $this->title);
         }
 
@@ -103,96 +99,23 @@ class doordelivery {
     }
 
     public function install(): void {
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                     configuration_value, 
-                                                                     configuration_group_id, 
-                                                                     sort_order, 
-                                                                     set_function, 
-                                                                     date_added) 
-                                                            VALUES ('MODULE_SHIPPING_DOORDELIVERY_STATUS', 
-                                                                    'True', 
-                                                                    '6', 
-                                                                    '1', 
-                                                                    'xtc_cfg_select_option(array(\'True\', \'False\'), ', 
-                                                                    now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) 
+                      VALUES ('MODULE_SHIPPING_DOORDELIVERY_STATUS', 'True', '6', '1', 'xtc_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                     configuration_value, 
-                                                                     configuration_group_id, 
-                                                                     sort_order, 
-                                                                     date_added) 
-                                                            VALUES ('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER', 
-                                                                    '0', 
-                                                                    '6', 
-                                                                    '2', 
-                                                                    now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) 
+                      VALUES ('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER', '0', '6', '2', now())");
 
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                     configuration_value, 
-                                                                     configuration_group_id, 
-                                                                     sort_order, 
-                                                                     date_added) 
-                                                            VALUES ('MODULE_SHIPPING_DOORDELIVERY_ALLOWED', 
-                                                                    '', 
-                                                                    '6', 
-                                                                    '3', 
-                                                                    now())");
-        
-      xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                   configuration_value, 
-                                                                   configuration_group_id, 
-                                                                   sort_order,  
-                                                                   set_function,
-                                                                   date_added) 
-                                                           VALUES ('MODULE_SHIPPING_DOORDELIVERY_COST', 
-                                                                   '0.00', 
-                                                                   '6', 
-                                                                   '4',
-                                                                   'xtc_cfg_doordelivery_fields(', 
-                                                                   now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) 
+                      VALUES ('MODULE_SHIPPING_DOORDELIVERY_ALLOWED', '', '6', '3', now())");
 
-      xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                   configuration_value, 
-                                                                   configuration_group_id, 
-                                                                   sort_order, 
-                                                                   use_function, 
-                                                                   set_function, 
-                                                                   date_added) 
-                                                           VALUES ('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS', 
-                                                                   '0', 
-                                                                   '6', 
-                                                                   '5', 
-                                                                   'xtc_get_tax_class_title', 
-                                                                   'xtc_cfg_pull_down_tax_classes(', 
-                                                                   now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) 
+                      VALUES ('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED', '', '6', '4', 'xtc_cfg_checkbox_unallowed_module(\'payment\', \'configuration[MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED]\',', now())");
 
-      xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                     configuration_value, 
-                                                                     configuration_group_id, 
-                                                                     sort_order, 
-                                                                     set_function, 
-                                                                     date_added) 
-                                                            VALUES ('MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED', 
-                                                                    '', 
-                                                                    '6', 
-                                                                    '6', 
-                                                                    'xtc_cfg_checkbox_unallowed_module(\'payment\', \'configuration[MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED]\',', 
-                                                                    now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) 
+                      VALUES ('MODULE_SHIPPING_DOORDELIVERY_AREAS', '', '6', '5', 'xtc_cfg_doordelivery_areas(', now())");
 
-      xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, 
-                                                                   configuration_value, 
-                                                                   configuration_group_id, 
-                                                                   sort_order, 
-                                                                   use_function, 
-                                                                   set_function, 
-                                                                   date_added) 
-                                                           VALUES ('MODULE_SHIPPING_DOORDELIVERY_AREAS', 
-                                                                   '', 
-                                                                   '6', 
-                                                                   '7', 
-                                                                   '', 
-                                                                   'xtc_cfg_doordelivery_areas(', 
-                                                                   now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, use_function, set_function, date_added) 
+                      VALUES ('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS', '0', '6', '6', 'xtc_get_tax_class_title', 'xtc_cfg_pull_down_tax_classes(', now())");
     }
 
     public function remove(): void {
@@ -203,42 +126,45 @@ class doordelivery {
         return array('MODULE_SHIPPING_DOORDELIVERY_STATUS', 
                      'MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER',
                      'MODULE_SHIPPING_DOORDELIVERY_ALLOWED',
-                     'MODULE_SHIPPING_DOORDELIVERY_COST',
-                     'MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS',
                      'MODULE_SHIPPING_DOORDELIVERY_PAYMENTS_ALLOWED',
-                     'MODULE_SHIPPING_DOORDELIVERY_AREAS');
+                     'MODULE_SHIPPING_DOORDELIVERY_AREAS',
+                     'MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS',);
     }
 
     /**
-     * Hilfsmethode zur PLZ-Validierung (Exakt, Von-Bis und Wildcard)
+     * Prüft die PLZ des Kunden gegen die JSON-Datenstruktur und liefert die Gebühr zurück.
+     * Gibt float bei einem Treffer zurück, andernfalls false.
      */
-    private function checkPostcodeMatch(string $customerZip, array $allowedZips): bool {
-        // 1. Eingabe des Kunden säubern und in Großbuchstaben umwandeln
+    private function getPostcodeFee(string $customerZip, array $allowedZips): float|bool {
         $customerZip = strtoupper(trim($customerZip));
 
-        foreach ($allowedZips as $zip) {
-            // Erlaubte PLZ säubern und in Großbuchstaben umwandeln
-            $zip = strtoupper(trim($zip));
-        
-            // 2. Exakter Treffer
-            if ($customerZip === $zip) {
-                return true; // Sofort abbrechen und "true" zurückgeben
+        foreach ($allowedZips as $entry) {
+            // Struktur validieren: Handelt es sich um ein neues Array/Objekt?
+            if (is_array($entry) && isset($entry['zip'])) {
+                $zip = strtoupper(trim($entry['zip']));
+                $fee = isset($entry['fee']) ? (float)$entry['fee'] : 0.00;
+            } else {
+                // Abwärtskompatibilität für Altdaten (reine Strings)
+                $zip = strtoupper(trim((string)$entry));
+                $fee = 0.00;
             }
         
-            // 3. Wildcard (z.B. 51* oder D02*)
+            // 1. Exakter Treffer
+            if ($customerZip === $zip) {
+                return $fee; 
+            }
+        
+            // 2. Wildcard-Treffer (z.B. 51* oder D02*)
             if (str_contains($zip, '*')) {
                 $quotedZip = preg_quote($zip, '#');
-                
-                // Modifier 'i' am Ende hinzugefügt für zusätzliche Case-Insensitivity-Sicherheit
                 $pattern = '#^' . str_replace('\*', '.*', $quotedZip) . '$#i';
                 
                 if (preg_match($pattern, $customerZip)) {
-                    return true; // Sofort abbrechen und "true" zurückgeben
+                    return $fee; 
                 }
             }
         }
         
-        // Wenn die Schleife ohne Treffer durchläuft
         return false;
     }
 }

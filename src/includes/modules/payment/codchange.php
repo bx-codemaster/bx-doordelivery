@@ -89,9 +89,34 @@ class codchange {
     }
   }
 
-  public function javascript_validation(): bool {
-    return false;
+public function javascript_validation() {
+  global $xtPrice;
+  $limitAllowed = (float)MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED;
+  $limitAllowedStrg = sprintf(MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT, $xtPrice->xtcFormatCurrency($limitAllowed));
+
+  // Wir nutzen heredoc (<<<JS) für saubere JS-Formatierung in PHP
+  $js = <<<JS
+  // 1. Das Eingabefeld für das Wechselgeld holen
+  var codChangeInput = document.querySelector('input[name="cod_change_bill"]');
+ 
+  if (codChangeInput) {
+    // Komma durch Punkt ersetzen für die mathematische Prüfung
+    var betrag = parseFloat(codChangeInput.value.replace(',', '.'));
+    
+    // 2. Wertgrenze prüfen (Größer oder gleich 500)
+    if (!isNaN(betrag) && betrag > $limitAllowed) {
+      alert("$limitAllowedStrg");
+      
+      codChangeInput.focus();
+      codChangeInput.select();
+      
+      // Führt dazu, dass check_form_payment() sofort mit false abbricht
+      return false; 
+    }
   }
+JS;
+    return $js;
+}
 
   public function selection(): false|array {
     global $xtPrice;

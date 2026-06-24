@@ -47,3 +47,5 @@ define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="
     <div>El importe de la factura es </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Aún falta </div><div style="text-align: right; font-weight: bold;">%s</div>
 </div>');
+
+define('MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT', 'Un importe de cambio de %s o más no está permitido por razones de seguridad. Por favor, introduzca un importe menor.');

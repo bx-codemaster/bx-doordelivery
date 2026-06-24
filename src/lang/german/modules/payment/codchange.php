@@ -47,3 +47,5 @@ define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="
     <div>Der Rechnungsbetrag beträgt </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Es fehlen noch </div><div style="text-align: right; font-weight: bold;">%s</div>
 </div>');
+
+define('MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT', 'Ein Wechselgeldbetrag von %s oder mehr ist aus Sicherheitsgründen nicht möglich. Bitte geben Sie einen kleineren Betrag ein.');
