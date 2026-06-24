@@ -98,20 +98,23 @@ public function javascript_validation() {
   $js = <<<JS
   // 1. Das Eingabefeld für das Wechselgeld holen
   var codChangeInput = document.querySelector('input[name="cod_change_bill"]');
- 
+
   if (codChangeInput) {
     // Komma durch Punkt ersetzen für die mathematische Prüfung
     var betrag = parseFloat(codChangeInput.value.replace(',', '.'));
     
     // 2. Wertgrenze prüfen (Größer oder gleich 500)
     if (!isNaN(betrag) && betrag > $limitAllowed) {
-      alert("$limitAllowedStrg");
+      //alert("$limitAllowedStrg");
       
       codChangeInput.focus();
       codChangeInput.select();
       
       // Führt dazu, dass check_form_payment() sofort mit false abbricht
-      return false; 
+      // return false;
+      submitter = null;
+      error = 1;
+      error_message = unescape("$limitAllowedStrg");
     }
   }
 JS;
