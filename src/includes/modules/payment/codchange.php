@@ -91,9 +91,10 @@ class codchange {
 
 public function javascript_validation() {
   global $xtPrice;
-  $limitAllowed = (float)MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED;
-  $limitAllowedStrg = sprintf(MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT, $xtPrice->xtcFormatCurrency($limitAllowed));
-
+  $limitAllowed     = (float)MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED;
+  //$limitAllowedStrg = sprintf(MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT, $xtPrice->xtcFormatCurrency($limitAllowed));
+  $limitAllowedStrg = sprintf(MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT, $xtPrice->xtcFormat($limitAllowed, true));
+  
   // Wir nutzen heredoc (<<<JS) für saubere JS-Formatierung in PHP
   $js = <<<JS
   // 1. Das Eingabefeld für das Wechselgeld holen

@@ -50,9 +50,13 @@ define('MODULE_SHIPPING_DOORDELIVERY_COST_NET_DESC', 'Ingrese el costo de envío
 define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Costo de Envío (Bruto)');
 define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS_DESC', 'Ingrese el costo de envío (bruto)...');
 
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER', 'Valor mínimo de pedido');
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_DESC', 'Valor mínimo de pedido para esta zona de entrega (0 = sin mínimo).');
+
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Áreas de Envío');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Ingrese los códigos postales o rangos de códigos postales que están dentro de su área de envío.<br>Por ejemplo, 12345, 23456 o 45*, 501* para todos los códigos postales que comienzan con 45 o 501. Elimine una entrada haciendo clic en ella.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . '<br>Código postal no está en el área de envío');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_MIN_ORDER', '<br>Valor mínimo de pedido para esta zona: %s (carrito actual: %s)');
 
 define ('MODULE_SHIPPING_DOORDELIVERY_TXT_ADD', 'Agregar');

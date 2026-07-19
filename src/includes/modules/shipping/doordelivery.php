@@ -20,6 +20,7 @@ class doordelivery {
     public string $sort_order;
     public array $quotes;
     public string $error;
+    public string $error_message;
 
     public function __construct() {
         $this->code        = 'doordelivery';
@@ -31,6 +32,7 @@ class doordelivery {
         $this->tax_class   = ((defined('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS')) ? MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS : '');
         $this->quotes      = array();
         $this->error       = 'False';
+        $this->error_message = MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA;
     }
 
     public function quote($method = ''): array|bool {
@@ -44,20 +46,37 @@ class doordelivery {
             $this->error = 'True';
         }
 
-        // 2. Erlaubte Liefergebiete (Array aus Objekten/Arrays mit 'zip' und 'fee')
+        // 2. Erlaubte Liefergebiete (Array aus Objekten/Arrays mit 'zip', 'fee' und optional 'minimum_order')
         // json_decode(..., true) stellt sicher, dass wir ein assoziatives PHP-Array erhalten
         $deliveryArea = defined('MODULE_SHIPPING_DOORDELIVERY_AREAS') ? json_decode(MODULE_SHIPPING_DOORDELIVERY_AREAS, true) : array();
         if (!is_array($deliveryArea)) {
             $deliveryArea = array();
         }
 
-        // 3. PLZ-Prüfung durchführen & passende Gebühr ermitteln
-        $matchedFee = $this->getPostcodeFee($customerZip, $deliveryArea);
+        // 3. PLZ-Prüfung durchführen & passende Konfiguration ermitteln
+        $matchedConfig = $this->getPostcodeConfig($customerZip, $deliveryArea);
+        $matchedFee   = 0.00;
+        $minimumOrder = 0.00;
 
-        if ($matchedFee === false) {
+        if ($matchedConfig === false) {
             // Nicht im Liefergebiet? Fehler triggern -> Modul zeigt Fehlermeldung oder blendet aus
             $this->error = 'True';
-            $matchedFee = 0.00; 
+            $this->error_message = MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA;
+        } else {
+            $matchedFee   = (float)$matchedConfig['fee'];
+            $minimumOrder = (float)$matchedConfig['minimum_order'];
+
+            $cartSubtotal = $this->getCartSubtotal();
+
+            if ($minimumOrder > 0 && $cartSubtotal < $minimumOrder) {
+                $this->error = 'True';
+                $this->error_message = sprintf(
+                    MODULE_SHIPPING_DOORDELIVERY_ERROR_MIN_ORDER,
+                    $this->formatCurrency($minimumOrder, true, $this->tax_class),
+                    $this->formatCurrency($cartSubtotal, false),
+                );
+                $matchedFee = 0.00;
+            }
         }
 
         $this->quotes = array(
@@ -66,7 +85,7 @@ class doordelivery {
         );
 
         if ('True' === $this->error) {
-            $this->quotes['error'] = MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA;
+            $this->quotes['error'] = $this->error_message;
         }
 
         // 4. Dynamische Kosten an die Checkout-Ausgabe übergeben
@@ -131,11 +150,36 @@ class doordelivery {
                      'MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS',);
     }
 
+    private function getCartSubtotal(): float {
+        global $order;
+
+        if (isset($order->info['subtotal']) && is_numeric($order->info['subtotal'])) {
+            return (float)$order->info['subtotal'];
+        }
+
+        if (isset($_SESSION['cart']) && is_object($_SESSION['cart'])) {
+            return (float)$_SESSION['cart']->show_total();
+        }
+
+        return 0.00;
+    }
+
+    private function formatCurrency(float $value, bool $includeTax = false, int $taxClass = 0): string {
+        global $xtPrice;
+
+        if (isset($xtPrice) && is_object($xtPrice) && method_exists($xtPrice, 'xtcFormat')) {
+            $resolvedTaxClass = ($includeTax && $taxClass > 0) ? $taxClass : 0;
+            return (string)$xtPrice->xtcFormat($value, true, $resolvedTaxClass, true);
+        }
+
+        return number_format($value, 2, ',', '.');
+    }
+
     /**
-     * Prüft die PLZ des Kunden gegen die JSON-Datenstruktur und liefert die Gebühr zurück.
-     * Gibt float bei einem Treffer zurück, andernfalls false.
+     * Prüft die PLZ des Kunden gegen die JSON-Datenstruktur und liefert Gebühr sowie Mindestbestellwert zurück.
+     * Gibt ein Array bei einem Treffer zurück, andernfalls false.
      */
-    private function getPostcodeFee(string $customerZip, array $allowedZips): float|bool {
+    private function getPostcodeConfig(string $customerZip, array $allowedZips): array|bool {
         $customerZip = strtoupper(trim($customerZip));
 
         foreach ($allowedZips as $entry) {
@@ -143,15 +187,20 @@ class doordelivery {
             if (is_array($entry) && isset($entry['zip'])) {
                 $zip = strtoupper(trim($entry['zip']));
                 $fee = isset($entry['fee']) ? (float)$entry['fee'] : 0.00;
+                $minimumOrder = isset($entry['minimum_order']) ? (float)$entry['minimum_order'] : 0.00;
             } else {
                 // Abwärtskompatibilität für Altdaten (reine Strings)
                 $zip = strtoupper(trim((string)$entry));
                 $fee = 0.00;
+                $minimumOrder = 0.00;
             }
         
             // 1. Exakter Treffer
             if ($customerZip === $zip) {
-                return $fee; 
+                return array(
+                    'fee' => $fee,
+                    'minimum_order' => $minimumOrder,
+                );
             }
         
             // 2. Wildcard-Treffer (z.B. 51* oder D02*)
@@ -160,7 +209,10 @@ class doordelivery {
                 $pattern = '#^' . str_replace('\*', '.*', $quotedZip) . '$#i';
                 
                 if (preg_match($pattern, $customerZip)) {
-                    return $fee; 
+                    return array(
+                        'fee' => $fee,
+                        'minimum_order' => $minimumOrder,
+                    );
                 }
             }
         }

@@ -49,9 +49,13 @@ define('MODULE_SHIPPING_DOORDELIVERY_COST_NET_DESC', 'Enter the shipping cost (n
 define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Shipping Cost (Gross)');
 define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS_DESC', 'Enter the shipping cost (gross)...');
 
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER', 'Minimum order value');
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_DESC', 'Minimum order value for this delivery area (0 = no minimum).');
+
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Shipping Areas');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Enter the zip codes or zip code ranges that are within your shipping area.<br>For example, 12345, 23456 or 45*, 501* for all zip codes starting with 45 or 501. Remove an entry by clicking on it.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . '<br>Zip code not in shipping area');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_MIN_ORDER', '<br>Minimum order value for this delivery area: %s (current cart: %s)');
 
 define ('MODULE_SHIPPING_DOORDELIVERY_TXT_ADD', 'Add');

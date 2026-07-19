@@ -45,14 +45,21 @@ define('MODULE_SHIPPING_DOORDELIVERY_ZIP_CODE_TITLE', 'Postleitzahl');
 define('MODULE_SHIPPING_DOORDELIVERY_ZIP_CODE_DESC', 'Geben Sie eine Postleitzahl oder einen Bereich ein.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_COST_NET', 'Liefergebühr (netto)');
-define('MODULE_SHIPPING_DOORDELIVERY_COST_NET_DESC', 'Liefergebühr (netto) eingeben...');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_NET_DESC', 'Netto eingeben...');
 
 define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS', 'Liefergebühr (brutto)');
-define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS_DESC', 'Liefergebühr (brutto) eingeben...');
+define('MODULE_SHIPPING_DOORDELIVERY_COST_GROSS_DESC', 'Brutto eingeben...');
+
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_NET', 'Mindestbestellwert (netto)');
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_NET_DESC', '0 = kein Mindestwert.');
+
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS', 'Mindestbestellwert (brutto)');
+define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS_DESC', '0 = kein Mindestwert.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Liefergebiete');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Geben Sie die Postleitzahlen oder Postleitzahlenbereiche an, welche in Ihrem Liefergebiet liegen.<br>Z.B. 12345, 23456 oder 45*, 501* für alle PLZ die mit 45 oder 501 beginnen. Sie entfernen einen Eintrag, indem Sie ihn anklicken.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . '<br>Nicht im Liefergebiet liegende Postleitzahl');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_MIN_ORDER', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-minimum-order-value.png', MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS . '" style="max-height: 64px;"') . 'Mindestbestellwert: %s (aktueller Warenkorb: %s)');
 
 define ('MODULE_SHIPPING_DOORDELIVERY_TXT_ADD', 'Hinzufügen');

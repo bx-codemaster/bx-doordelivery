@@ -20,44 +20,54 @@
 (function() {
     function initDoorDelivery() {
         /* BOF Calculate NET / GROSS */
-        const nettotext  = document.getElementById('feeInputNetto');
-        const bruttotext = document.getElementById('feeInputBrutto');
-        
+        const nettofeetext       = document.getElementById('feeInputNetto');
+        const bruttofeetext      = document.getElementById('feeInputBrutto');
+        const nettominimumOrder  = document.getElementById('minimumOrderNetto');
+        const bruttominimumOrder = document.getElementById('minimumOrderBrutto');
+                
         // Fester Faktor basierend auf dem Steuersatz
         const FAKTOR = 1 + (<?php echo (float)$delivery_tax_rate; ?> / 100);
         
-        if (nettotext && bruttotext) {
+        function bindNetGrossPair(nettoInput, bruttoInput) {
+            if (!nettoInput || !bruttoInput) {
+                return;
+            }
+
             // Initialen Wert berechnen, falls Netto vorhanden ist
-            if (nettotext.value && !isNaN(parseFloat(nettotext.value.replace(',', '.')))) {
-                const initialNetto = parseFloat(nettotext.value.replace(',', '.'));
-                bruttotext.value = (initialNetto * FAKTOR).toFixed(4);
+            if (nettoInput.value && !isNaN(parseFloat(nettoInput.value.replace(',', '.')))) {
+                const initialNetto = parseFloat(nettoInput.value.replace(',', '.'));
+                bruttoInput.value = (initialNetto * FAKTOR).toFixed(4);
             }
 
             // Event für Netto-Eingabe (Berechnet Brutto)
-            nettotext.addEventListener('input', function () {
+            nettoInput.addEventListener('input', function () {
                 let wert = parseFloat(this.value.replace(',', '.'));
                 if (!isNaN(wert)) {
-                    bruttotext.value = (wert * FAKTOR).toFixed(4);
+                    bruttoInput.value = (wert * FAKTOR).toFixed(4);
                 } else {
-                    bruttotext.value = '';
+                    bruttoInput.value = '';
                 }
             });
 
             // Event für Brutto-Eingabe (Berechnet Netto)
-            bruttotext.addEventListener('input', function () {
+            bruttoInput.addEventListener('input', function () {
                 let wert = parseFloat(this.value.replace(',', '.'));
                 if (!isNaN(wert)) {
-                    nettotext.value = (wert / FAKTOR).toFixed(4);
+                    nettoInput.value = (wert / FAKTOR).toFixed(4);
                 } else {
-                    nettotext.value = '';
+                    nettoInput.value = '';
                 }
             });
         }
+
+        bindNetGrossPair(nettofeetext, bruttofeetext);
+        bindNetGrossPair(nettominimumOrder, bruttominimumOrder);
         /* EOF Calculate NET / GROSS */
 
         /* BOF AD ZIPS */
         const areaInput   = document.getElementById('areaInput');
         const feeInput    = document.getElementById('feeInputNetto'); 
+        const minimumOrderNetto = document.getElementById('minimumOrderNetto');
         const addButton   = document.getElementById('addArea');
         const areaList    = document.getElementById('areaList');
         const hiddenInput = document.getElementById('jsonHiddenInput');
@@ -66,12 +76,13 @@
 
         let zipsArray = [];
         
-        function renderListItem(zip, fee) {
+        function renderListItem(zip, fee, minimumOrder) {
             if (!areaList) return;
             const newZip = document.createElement('li');
-            newZip.innerHTML = `<strong>${zip}</strong> - Gebühr: ${parseFloat(fee).toFixed(2)} € <span style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">[X]</span>`;
+            newZip.innerHTML = `<strong>${zip}</strong> - Gebühr: ${parseFloat(fee).toFixed(2)} € - Mindestbestellwert: ${parseFloat(minimumOrder).toFixed(2)} € <span style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">[X]</span>`;
             newZip.setAttribute('data-zip', zip); 
             newZip.setAttribute('data-fee', fee); 
+            newZip.setAttribute('data-minimum-order', minimumOrder);
             areaList.appendChild(newZip);
         }
 
@@ -83,9 +94,9 @@
                     areaList.innerHTML = ''; // Liste leeren gegen Doppel-Rendering
                     zipsArray.forEach(item => {
                         if (typeof item === 'object' && item !== null) {
-                            renderListItem(item.zip, item.fee);
+                            renderListItem(item.zip, item.fee, item.minimum_order || 0);
                         } else {
-                            renderListItem(item, "0.00");
+                            renderListItem(item, "0.00", "0.00");
                         }
                     });
                 }
@@ -96,13 +107,18 @@
         }
 
         function addPostalCode() {
-            if (!areaInput || !feeInput) return;
+            if (!areaInput || !feeInput || !minimumOrderNetto) return;
 
             const text = areaInput.value.trim();
             let fee  = feeInput.value.trim().replace(',', '.'); 
+            let minimumOrder = minimumOrderNetto.value.trim().replace(',', '.');
 
             if (fee === "") {
                 fee = "0.00";
+            }
+
+            if (minimumOrder === "") {
+                minimumOrder = "0.00";
             }
 
             if (text !== "") {
@@ -118,6 +134,11 @@
                     return;
                 }
 
+                if (isNaN(parseFloat(minimumOrder)) || parseFloat(minimumOrder) < 0) {
+                    alert("Bitte einen gültigen Mindestbestellwert eingeben (z.B. 25.00 oder 0 für keinen Mindestwert).");
+                    return;
+                }
+
                 const exists = zipsArray.some(item => typeof item === 'object' && item !== null ? item.zip === text : item === text);
                 if (exists) {
                     alert("Diese PLZ oder dieser Bereich existiert bereits in der Liste.");
@@ -125,14 +146,17 @@
                 }
 
                 fee = parseFloat(fee).toFixed(2);
-                renderListItem(text, fee);
+                minimumOrder = parseFloat(minimumOrder).toFixed(2);
+                renderListItem(text, fee, minimumOrder);
 
-                zipsArray.push({ zip: text, fee: fee });
+                zipsArray.push({ zip: text, fee: fee, minimum_order: minimumOrder });
                 hiddenInput.value = JSON.stringify(zipsArray);
 
                 areaInput.value = "";
                 feeInput.value = "";
-                if(bruttotext) bruttotext.value = "";
+                minimumOrderNetto.value = "";
+                if (bruttofeetext) bruttofeetext.value = "";
+                if (bruttominimumOrder) bruttominimumOrder.value = "";
                 areaInput.focus();
             }
         }
@@ -165,7 +189,7 @@
         if (addButton && areaInput) {
             addButton.addEventListener('click', addPostalCode);
             
-            [areaInput, feeInput, bruttotext].forEach(input => {
+            [areaInput, feeInput, bruttofeetext, minimumOrderNetto, bruttominimumOrder].forEach(input => {
                 if (input) { 
                     input.addEventListener('keypress', (event) => {
                         if (event.key === 'Enter') {

@@ -45,6 +45,12 @@
   color: #721c24;            /* Dunkelroter Text für perfekten Kontrast */
   border-color: #f5c6cb;     /* Ein passender, rötlicher Rahmen */
 }
+
+
+div.parent div.areaInput div div label {
+  font-size: 9px;
+  color: #495057; /* Dunkelgrau für bessere Lesbarkeit */
+}
 </style>
 <?php 
   }
