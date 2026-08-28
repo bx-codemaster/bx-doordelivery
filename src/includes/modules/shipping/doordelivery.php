@@ -26,7 +26,7 @@ class doordelivery {
         $this->code        = 'doordelivery';
         $this->title       = MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE;
         $this->description = MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION;
-        $this->icon        = DIR_WS_ICONS . 'bx-doordelivery.png';
+        $this->icon        = ''; //DIR_WS_ICONS . 'bx-doordelivery.png';
         $this->sort_order  = ((defined('MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER')) ? MODULE_SHIPPING_DOORDELIVERY_SORT_ORDER : '');
         $this->enabled     = ((defined('MODULE_SHIPPING_DOORDELIVERY_STATUS') && MODULE_SHIPPING_DOORDELIVERY_STATUS == 'True') ? true : false);
         $this->tax_class   = ((defined('MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS')) ? MODULE_SHIPPING_DOORDELIVERY_TAX_CLASS : '');

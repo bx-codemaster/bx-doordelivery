@@ -35,6 +35,7 @@ define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TITLE', 'Anzeige im Checkout');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_DESC', 'Soll ein Hinweis auf zusätzlich anfallende Kosten im Checkout angezeigt werden?');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TEXT', '<div class="infomessage">Der Rechnungsbetrag ist bei Sendungsübergabe an den Zusteller zu entrichten.</div>');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_BILL_TEXT', 'Geplantes Wechselgeld:');
+define('MODULE_PAYMENT_CODCHANGE_DISPLAY_TIP_TEXT', 'Geplantes Trinkgeld:');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div class="successmessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
     <div>Sie zahlen mit </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>Der Rechnungsbetrag beträgt </div><div style="text-align: right; font-weight: bold;">%s</div>
@@ -49,3 +50,7 @@ define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="
 </div>');
 
 define('MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT', 'Ein Wechselgeldbetrag von %s oder mehr ist aus Sicherheitsgründen nicht möglich. Bitte geben Sie einen kleineren Betrag ein.');
+
+define('MODULE_PAYMENT_CODCHANGE_MEMO_TITLE', 'Barzahlung mit Wechselgeld');
+define('MODULE_PAYMENT_CODCHANGE_MEMO_TEXT_CHANGE', 'Der Kunde hat angegeben, dass er mit einem Betrag von %s bezahlen möchte. Der Gesamtbetrag der Bestellung beträgt %s. Das Wechselgeld beträgt somit %s.');
+define('MODULE_PAYMENT_CODCHANGE_MEMO_TEXT_TIP', 'Der Kunde hat angegeben, dass er dem Boten ein Trinkgeld von %s geben möchte.');

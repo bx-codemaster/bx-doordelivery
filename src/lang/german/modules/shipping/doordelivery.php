@@ -22,7 +22,7 @@
    ---------------------------------------------------------------------------------------*/
 
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE', 'Haustürlieferung');
-define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', 'Wir liefern Ihnen die Ware direkt an Ihre Haustüre.');
+define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', xtc_image(DIR_WS_ICONS . 'bx-codchange.png', MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE . '" style="max-height: 64px;"') . '<br>Wir liefern Ihnen die Ware direkt an Ihre Haustüre.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_WAY', MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION);
 
@@ -59,7 +59,9 @@ define('MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS_DESC', '0 = kein Mindes
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE', 'Liefergebiete');
 define('MODULE_SHIPPING_DOORDELIVERY_AREAS_DESC', 'Geben Sie die Postleitzahlen oder Postleitzahlenbereiche an, welche in Ihrem Liefergebiet liegen.<br>Z.B. 12345, 23456 oder 45*, 501* für alle PLZ die mit 45 oder 501 beginnen. Sie entfernen einen Eintrag, indem Sie ihn anklicken.');
 
-define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"') . '<br>Nicht im Liefergebiet liegende Postleitzahl');
-define('MODULE_SHIPPING_DOORDELIVERY_ERROR_MIN_ORDER', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-minimum-order-value.png', MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS . '" style="max-height: 64px;"') . 'Mindestbestellwert: %s (aktueller Warenkorb: %s)');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_NOT_IN_AREA', '<table>
+<tr><td>'.xtc_image(DIR_WS_ICONS . 'bx-nodelivery.png', MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_AREAS_TITLE . '" style="max-height: 64px;"')
+ . '</td></tr><tr><td>Nicht im Liefergebiet liegende Postleitzahl</td></tr></table>');
+define('MODULE_SHIPPING_DOORDELIVERY_ERROR_MIN_ORDER', '<br>'.xtc_image(DIR_WS_ICONS . 'bx-minimum-order-value.png', MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_MINIMUM_ORDER_GROSS . '" style="max-height: 64px;"') . '<br>Mindestbestellwert: %s (aktueller Warenkorb: %s)');
 
 define ('MODULE_SHIPPING_DOORDELIVERY_TXT_ADD', 'Hinzufügen');

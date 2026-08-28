@@ -35,6 +35,7 @@ define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TITLE', 'Display in Checkout');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_DESC', 'Should a notice about additional costs be displayed in the checkout?');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO_TEXT', '<div class="infomessage">The invoice amount is to be paid upon delivery to the courier.</div>');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_BILL_TEXT', 'Planned Change:');
+define('MODULE_PAYMENT_CODCHANGE_DISPLAY_TIP_TEXT', 'Planned Tip:');
 define('MODULE_PAYMENT_CODCHANGE_DISPLAY_NOTE_TEXT', '<div class="successmessage" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
     <div>You pay with </div><div style="text-align: right; font-weight: bold;">%s</div>
     <div>The invoice amount is </div><div style="text-align: right; font-weight: bold;">%s</div>
@@ -49,3 +50,7 @@ define('MODULE_PAYMENT_CODCHANGE_ERROR_TEXT', '<div class="errormessage" style="
 </div>');
 
 define('MODULE_PAYMENT_CODCHANGE_ERROR_LIMIT_TEXT', 'A change amount of %s or more is not allowed for security reasons. Please enter a smaller amount.');
+
+define('MODULE_PAYMENT_CODCHANGE_MEMO_TITLE', 'Cash on Delivery with Change');
+define('MODULE_PAYMENT_CODCHANGE_MEMO_TEXT_CHANGE', 'The customer indicated that they want to pay with an amount of %s. The total order amount is %s. The change is therefore %s.');
+define('MODULE_PAYMENT_CODCHANGE_MEMO_TEXT_TIP', 'The customer indicated that they want to give the courier a tip of %s.');

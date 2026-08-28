@@ -24,15 +24,15 @@ class codchange {
     global $order;
 
     $this->code        = 'codchange';
-    $this->title       = defined('MODULE_PAYMENT_CODCHANGE_TEXT_TITLE') ? MODULE_PAYMENT_CODCHANGE_TEXT_TITLE : 'Barzahlung mit Wechselgeld';
-    $this->description = defined('MODULE_PAYMENT_CODCHANGE_TEXT_DESCRIPTION') ? MODULE_PAYMENT_CODCHANGE_TEXT_DESCRIPTION : 'Barzahlung bei Lieferung mit Wechselgeld-Angabe';
+    $this->title       = MODULE_PAYMENT_CODCHANGE_TEXT_TITLE;
+    $this->description = MODULE_PAYMENT_CODCHANGE_TEXT_DESCRIPTION;
     $this->icon        = DIR_WS_ICONS . 'bx-codchange.png';
-    $this->sort_order  = ((defined('MODULE_PAYMENT_CODCHANGE_SORT_ORDER')) ? (int)MODULE_PAYMENT_CODCHANGE_SORT_ORDER : 0);
+    $this->sort_order  = (defined('MODULE_PAYMENT_CODCHANGE_SORT_ORDER') ? (int)MODULE_PAYMENT_CODCHANGE_SORT_ORDER : 0);
     $this->enabled     = ((defined('MODULE_PAYMENT_CODCHANGE_STATUS') && MODULE_PAYMENT_CODCHANGE_STATUS == 'True') ? true : false);
     
     $desc_text = defined('MODULE_PAYMENT_CODCHANGE_TEXT_DESCRIPTION') ? MODULE_PAYMENT_CODCHANGE_TEXT_DESCRIPTION : '';
     $info_text = defined('MODULE_PAYMENT_CODCHANGE_TEXT_INFO') ? MODULE_PAYMENT_CODCHANGE_TEXT_INFO : '';
-    $this->info        = ((defined('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO') && MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO == 'True') ? $desc_text.'<br />'.$info_text : $desc_text);
+    $this->info = ((defined('MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO') && MODULE_PAYMENT_CODCHANGE_DISPLAY_INFO == 'True') ? $desc_text.'<br />'.$info_text : $desc_text);
     
     if ($this->check() === true) {
       $this->limit_subtotal = defined('MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED') ? floatval(MODULE_PAYMENT_CODCHANGE_LIMIT_ALLOWED) : 600.00;
@@ -140,6 +140,10 @@ JS;
       array(
         'title' => MODULE_PAYMENT_CODCHANGE_QUESTION_TEXT,
         'field' => xtc_draw_input_field('cod_change_bill', $_SESSION['cod_change_bill'] ?? '', 'placeholder="z.B. 50" style="width:100px;" onkeydown="if(event.key === \',\'){event.preventDefault(); this.value += \'.\';}"').' '.MODULE_PAYMENT_CODCHANGE_COURIER_CHANGE_TEXT,
+      ),
+      array(
+        'title' => 'Möchten Sie dem Boten ein Trinkgeld geben?',
+        'field' => xtc_draw_input_field('cod_tip', $_SESSION['cod_tip'] ?? '', 'placeholder="z.B. 2" style="width:100px;" onkeydown="if(event.key === \',\'){event.preventDefault(); this.value += \'.\';}"'),
       )
     );
 
@@ -160,6 +164,15 @@ JS;
         $_SESSION['cod_change_bill'] = null;
       }
     }
+    if (isset($_POST['cod_tip'])) {
+      // Bereinigen (Sonderzeichen entfernen) und Validieren der Benutzereingabe
+      $tip = filter_var($_POST['cod_tip'], FILTER_VALIDATE_FLOAT);
+      if ( !empty($tip) && $tip > 0.00 ) {
+        $_SESSION['cod_tip'] = $tip;
+      } else {
+        $_SESSION['cod_tip'] = null;
+      }
+    }
     return false;
   }
 
@@ -173,6 +186,16 @@ JS;
                 'field' => $xtPrice->xtcFormatCurrency($_SESSION['cod_change_bill']) . ' - ' 
                          . $xtPrice->xtcFormatCurrency($_SESSION['cart']->show_total()). ' = <strong>' 
                          . $xtPrice->xtcFormatCurrency($_SESSION['cod_change_bill'] - $_SESSION['cart']->show_total()) . '</strong>')
+        )
+      );
+    }
+
+    if (isset($_SESSION['cod_tip']) && !empty($_SESSION['cod_tip'])) {
+      return array(
+        'title'  => MODULE_PAYMENT_CODCHANGE_DISPLAY_TIP_TEXT,
+        'fields' => array(
+          array('title' => MODULE_PAYMENT_CODCHANGE_DISPLAY_TIP_TEXT, 
+                'field' => $xtPrice->xtcFormatCurrency($_SESSION['cod_tip']))
         )
       );
     }
@@ -251,27 +274,41 @@ JS;
       }
     }
 
-    $change_query = xtc_db_query("SELECT cod_change_bill FROM orders WHERE orders_id = '".(int)$insert_id."';");
-    $change = xtc_db_fetch_array($change_query, true);
-    $cash   = $xtPrice->xtcFormatCurrency((float)$change["cod_change_bill"]);
-    $total  = $xtPrice->xtcFormatCurrency((float)$_SESSION['cart']->show_total());
-    $change_amount = $xtPrice->xtcFormatCurrency((float)$change["cod_change_bill"] - (float)$_SESSION['cart']->show_total());
-    
-    // Barzahlung mit Wechselgeld
-    define('MODULE_PAYMENT_CODCHANGE_MEMO_TITLE', 'Barzahlung mit Wechselgeld');
-    $memo_title = MODULE_PAYMENT_CODCHANGE_MEMO_TITLE;
+    $change_query  = xtc_db_query("SELECT cod_change_bill, cod_tip FROM orders WHERE orders_id = '".(int)$insert_id."';");
+    $change        = xtc_db_fetch_array($change_query, true);
 
-    define('MODULE_PAYMENT_CODCHANGE_MEMO_TEXT', 'Der Kunde hat angegeben, dass er mit einem Betrag von %s bezahlen möchte. Der Gesamtbetrag der Bestellung beträgt %s. Das Wechselgeld beträgt somit %s.');
-    $memo_text  = sprintf(MODULE_PAYMENT_CODCHANGE_MEMO_TEXT, $cash, $total, $change_amount);
+    $hasChange = (float)$change["cod_change_bill"] > 0.0;
+    $hasTip    = (float)$change["cod_tip"] > 0.0;
 
-    $sql_data_array = array(
-      'customers_id' => (int)$_SESSION['customer_id'],
-      'memo_date'    => date("Y-m-d"),
-      'memo_title'   => $memo_title,
-      'memo_text'    => nl2br($memo_text),
-      'poster_id'    => (int)$_SESSION['customer_id']
-    );
-    xtc_db_perform(TABLE_CUSTOMERS_MEMO, $sql_data_array);
+    // Nur wenn Wechselgeld- oder Trinkgeldangabe vorhanden ist, überhaupt ein Memo anlegen
+    if ($hasChange || $hasTip) {
+        $cash          = $xtPrice->xtcFormatCurrency((float)$change["cod_change_bill"]);
+        $total         = $xtPrice->xtcFormatCurrency((float)$_SESSION['cart']->show_total());
+        $change_amount = $xtPrice->xtcFormatCurrency((float)$change["cod_change_bill"] - (float)$_SESSION['cart']->show_total());
+        $tip           = $xtPrice->xtcFormatCurrency((float)$change["cod_tip"]);
+
+        $memo_parts = array();
+        
+        if ($hasChange) {
+            $memo_parts[] = sprintf(MODULE_PAYMENT_CODCHANGE_MEMO_TEXT_CHANGE, $cash, $total, $change_amount);
+        }
+
+        if ($hasTip) {
+            $memo_parts[] = sprintf(MODULE_PAYMENT_CODCHANGE_MEMO_TEXT_TIP, $tip);
+        }
+        
+        $memo_text = implode(' ', $memo_parts);
+
+        $sql_data_array = array(
+          'customers_id' => (int)$_SESSION['customer_id'],
+          'memo_date'    => date("Y-m-d"),
+          'memo_title'   => MODULE_PAYMENT_CODCHANGE_MEMO_TITLE,
+          'memo_text'    => nl2br($memo_text),
+          'poster_id'    => (int)$_SESSION['customer_id']
+        );
+        xtc_db_perform(TABLE_CUSTOMERS_MEMO, $sql_data_array);
+    }
+
   }
 
   public function get_error(): bool {
@@ -298,10 +335,17 @@ JS;
   }
 
   public function install(): void {
-    // Spalte für das Wechselgeld in der Bestell-Tabelle hinzufügen, falls sie noch nicht existiert
-    $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE 'cod_change_bill'");
-    if (xtc_db_num_rows($check_column) == 0) {
-      xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD cod_change_bill VARCHAR(32) DEFAULT NULL");
+    // Spalten für Wechselgeld und Trinkgeld in der Bestell-Tabelle hinzufügen, falls sie noch nicht existieren
+    $columns_to_add = [
+        'cod_change_bill' => "VARCHAR(32) DEFAULT NULL",
+        'cod_tip'         => "VARCHAR(32) DEFAULT NULL",
+    ];
+
+    foreach ($columns_to_add as $column_name => $column_definition) {
+        $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE '" . $column_name . "'");
+        if (xtc_db_num_rows($check_column) == 0) {
+            xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD " . $column_name . " " . $column_definition);
+        }
     }
 
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, 
@@ -395,10 +439,18 @@ JS;
   }
 
   public function remove(): void {
-    $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE 'cod_change_bill'");
-    if (xtc_db_num_rows($check_column) > 0) {
-      xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " DROP `cod_change_bill`");
+    $columns_to_delete = [
+      'cod_change_bill',
+      'cod_tip',
+    ];
+
+    foreach ($columns_to_delete as $column_name) {
+      $check_column = xtc_db_query("SHOW COLUMNS FROM " . TABLE_ORDERS . " LIKE '" . $column_name . "'");
+      if (xtc_db_num_rows($check_column) > 0) {
+        xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " DROP `" . $column_name . "`");
+      }
     }
+    
     xtc_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE configuration_key in ('".implode("', '", $this->keys())."')");
   }
 

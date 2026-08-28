@@ -22,7 +22,7 @@
    ---------------------------------------------------------------------------------------*/
 
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE', 'Entrega a Domicilio');
-define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', 'Entregamos los productos directamente en su puerta.');
+define('MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION', xtc_image(DIR_WS_ICONS . 'bx-codchange.png', MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE, '', '', 'title="' . MODULE_SHIPPING_DOORDELIVERY_TEXT_TITLE . '" style="max-height: 64px;"') . ' Entregamos los productos directamente en su puerta.');
 
 define('MODULE_SHIPPING_DOORDELIVERY_TEXT_WAY', MODULE_SHIPPING_DOORDELIVERY_TEXT_DESCRIPTION);
 
